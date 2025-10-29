@@ -1,24 +1,277 @@
-# Compiled class file
+# Learn-Lang Repository .gitignore
+# This file excludes binaries, build artifacts, and generated files
+
+# ==============================================================================
+# C++ - Compiled binaries and object files
+# ==============================================================================
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+# C++ compiled executables (no extension on Unix)
+cplusplus/lessons/01-hello-world
+cplusplus/lessons/hello-world
+
+# ==============================================================================
+# Rust - Build artifacts and binaries
+# ==============================================================================
+rust/target/
+rust/**/target/
+rust/lessons/01-hello-world
+rust/lessons/hello-world
+rust/**/*.rs.bk
+rust/Cargo.lock
+*.pdb
+*.rlib
+*.rmeta
+
+# ==============================================================================
+# Java - Compiled classes and build artifacts
+# ==============================================================================
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
-*.nar
 *.ear
-*.zip
-*.tar.gz
-*.rar
+*.nar
+java/lessons/*.class
+java/lessons/HelloWorld01.class
+java/build/
+java/out/
+java/.gradle/
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# ==============================================================================
+# Groovy - Compiled classes and build artifacts
+# ==============================================================================
+groovy/**/*.class
+groovy/build/
+groovy/.gradle/
+
+# ==============================================================================
+# Python - Bytecode and caches
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+python/**/__pycache__/
+python/**/*.pyc
+python/**/*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+venv/
+env/
+ENV/
+
+# ==============================================================================
+# JavaScript/TypeScript - Dependencies and compiled files
+# ==============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.npm
+.eslintcache
+*.tsbuildinfo
+# Keep compiled .js files in TypeScript lessons for demonstration
+# typescript/lessons/*.js
+
+# ==============================================================================
+# Spock/Gradle - Build artifacts
+# ==============================================================================
+spock/lessons/build/
+spock/lessons/.gradle/
+spock/**/.gradle/
+spock/**/build/
+.gradle/
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# ==============================================================================
+# Cucumber - Test reports
+# ==============================================================================
+cucumber/lessons/cucumber-report.html
+cucumber/lessons/cucumber-report.json
+cucumber/lessons/reports/
+cucumber/lessons/.cucumber/
+
+# ==============================================================================
+# IDE and Editor files
+# ==============================================================================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+.metadata
+bin/
+tmp/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ==============================================================================
+# Operating System files
+# ==============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+.nfs*
+
+# ==============================================================================
+# Logs and temporary files
+# ==============================================================================
+*.log
+*.tmp
+*.temp
+*.pid
+*.seed
+*.pid.lock
+logs/
+*.log.*
+log/
+
+# ==============================================================================
+# Test and coverage reports
+# ==============================================================================
+test-results/
+coverage/
+.nyc_output/
+*.lcov
+*.cover
+.hypothesis/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.cache
+reports/
+
+# ==============================================================================
+# Package manager files (keep package.json, lock files for lessons)
+# ==============================================================================
+# Keep package.json and package-lock.json in lessons directories
+# But exclude node_modules
+
+# ==============================================================================
+# Database files
+# ==============================================================================
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+
+# ==============================================================================
+# Backup files
+# ==============================================================================
+*.bak
+*.backup
+*.old
+*~
+
+# ==============================================================================
+# Compiled documentation
+# ==============================================================================
+docs/_build/
+site/
+
+# ==============================================================================
+# Environment and credentials
+# ==============================================================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+credentials/
+
+# ==============================================================================
+# Miscellaneous
+# ==============================================================================
+*.diff
+*.patch
+*.orig
+.sass-cache/
+*.css.map
+*.map
