@@ -1,0 +1,2 @@
+Claude
+Build a s3 lifecycle/archival CLI prototype in rust

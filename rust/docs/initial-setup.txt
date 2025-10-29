@@ -1,0 +1,1807 @@
+# Rust Initial Setup Guide
+
+## What is Rust?
+
+Rust is a multi-paradigm, statically typed programming language focused on performance, safety, and concurrency. It achieves memory safety without garbage collection through its unique ownership system. Rust prevents common bugs like null pointer dereferences, data races, and buffer overflows at compile time, making it ideal for systems programming, embedded systems, and high-performance applications.
+
+## Extensions in VSCode
+
+### Essential Extensions
+
+1. **rust-analyzer** - Must have
+   - Official Rust language server
+   - IntelliSense, code completion, inline error messages
+   - Extension ID: rust-lang.rust-analyzer
+
+2. **CodeLLDB** - For debugging
+   - Native debugger based on LLDB
+   - Extension ID: vadimcn.vscode-lldb
+
+### Highly Recommended
+
+3. **crates**
+   - Helps manage dependencies in Cargo.toml
+   - Shows latest versions, documentation
+   - Extension ID: serayuzgur.crates
+
+4. **Even Better TOML**
+   - TOML language support for Cargo.toml
+   - Syntax highlighting and validation
+   - Extension ID: tamasfe.even-better-toml
+
+5. **Error Lens**
+   - Shows errors inline in the editor
+   - Great for Rust's detailed error messages
+   - Extension ID: usernamehw.errorlens
+
+### Optional but Useful
+
+6. **Dependi**
+   - Dependency version management
+   - Extension ID: fill-labs.dependi
+
+7. **Test Explorer for Rust**
+   - Run and debug tests in UI
+   - Extension ID: swellaby.vscode-rust-test-adapter
+
+8. **rust-syntax**
+   - Enhanced syntax highlighting
+   - Extension ID: dustypomerleau.rust-syntax
+
+9. **Better Comments**
+   - Colorful comment highlighting
+   - Extension ID: aaron-bond.better-comments
+
+10. **Markdown All in One** (for documentation)
+    - Extension ID: yzhang.markdown-all-in-one
+
+## Installation
+
+### Install Rust using rustup (Recommended for all platforms)
+
+rustup is the official Rust toolchain installer and version manager.
+
+#### macOS and Linux
+
+```bash
+# Install rustup
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Follow the prompts (usually just press 1 for default)
+
+# Source the environment (or restart terminal)
+source "$HOME/.cargo/env"
+
+# Verify installation
+rustc --version
+cargo --version
+rustup --version
+
+# Update Rust
+rustup update
+```
+
+#### Windows
+
+**Option 1: Using rustup-init.exe (Recommended)**
+1. Download from https://rustup.rs/
+2. Run `rustup-init.exe`
+3. Follow the installation wizard
+4. Restart terminal/PowerShell
+5. Verify:
+```powershell
+rustc --version
+cargo --version
+```
+
+**Option 2: Using Chocolatey**
+```powershell
+choco install rust
+```
+
+**Note for Windows**: You may need C++ build tools:
+- Download Visual Studio Build Tools
+- Or install Visual Studio with C++ development workload
+- Or use rust-msvc toolchain
+
+### Alternative Installation Methods
+
+#### Using Package Managers (Not Recommended - May be outdated)
+
+**macOS (Homebrew)**
+```bash
+brew install rust
+# But rustup is preferred
+```
+
+**Linux (APT)**
+```bash
+sudo apt install rustc cargo
+# But rustup is preferred
+```
+
+### What Gets Installed
+
+- **rustc**: The Rust compiler
+- **cargo**: Rust's package manager and build tool
+- **rustup**: Toolchain manager
+- **rust-std**: Standard library
+- **rust-docs**: Offline documentation
+
+### Configure rustup
+
+```bash
+# Show installed toolchains
+rustup show
+
+# Install nightly toolchain
+rustup install nightly
+
+# Install beta toolchain
+rustup install beta
+
+# Set default toolchain
+rustup default stable
+rustup default nightly
+
+# Update Rust
+rustup update
+
+# Check for updates
+rustup check
+
+# Install specific version
+rustup install 1.75.0
+
+# Install additional components
+rustup component add rustfmt      # Code formatter
+rustup component add clippy       # Linter
+rustup component add rust-src     # Source code
+rustup component add rust-docs    # Documentation
+rustup component add rust-analyzer # Language server
+
+# Add target for cross-compilation
+rustup target add wasm32-unknown-unknown
+rustup target add x86_64-pc-windows-gnu
+
+# List installed components
+rustup component list --installed
+```
+
+## How to Compile and Run Rust Programs
+
+### Method 1: Using rustc (Direct Compilation)
+
+```bash
+# Compile a single file
+rustc main.rs
+
+# Run the compiled binary
+./main           # macOS/Linux
+main.exe         # Windows
+
+# Compile with optimization
+rustc -O main.rs
+rustc --opt-level=3 main.rs
+
+# Compile with debug info
+rustc -g main.rs
+
+# Show warnings
+rustc -W warnings main.rs
+
+# Check without compiling
+rustc --check main.rs
+```
+
+### Method 2: Using Cargo (Recommended)
+
+```bash
+# Create new binary project
+cargo new my-project
+cargo new my-project --bin
+
+# Create new library project
+cargo new my-library --lib
+
+# Build the project (debug mode)
+cargo build
+
+# Build with optimizations (release mode)
+cargo build --release
+
+# Run the project (compiles if needed)
+cargo run
+
+# Run in release mode
+cargo run --release
+
+# Run with arguments
+cargo run -- arg1 arg2
+
+# Check code without building
+cargo check
+
+# Run tests
+cargo test
+
+# Run benchmarks
+cargo bench
+
+# Build documentation
+cargo doc
+cargo doc --open  # Build and open in browser
+
+# Clean build artifacts
+cargo clean
+
+# Update dependencies
+cargo update
+
+# Format code
+cargo fmt
+
+# Lint code
+cargo clippy
+
+# Show dependency tree
+cargo tree
+```
+
+### Method 3: Using VSCode
+
+**Method 3a: Run/Debug Buttons**
+- Open main.rs with a main function
+- Click "Run" or "Debug" above the main function
+- Or press F5 to start debugging
+
+**Method 3b: Terminal in VSCode**
+```bash
+# Open terminal (Ctrl+` or Cmd+`)
+cargo run
+```
+
+**Method 3c: Tasks (Ctrl/Cmd + Shift + B)**
+- Configure build tasks in .vscode/tasks.json
+- Run with keyboard shortcut
+
+### Method 4: cargo watch (Auto-rebuild on changes)
+
+```bash
+# Install cargo-watch
+cargo install cargo-watch
+
+# Watch and run on changes
+cargo watch -x run
+
+# Watch and test
+cargo watch -x test
+
+# Watch, clear screen, and run
+cargo watch -c -x run
+
+# Watch with custom command
+cargo watch -x "run --release"
+```
+
+### Common Cargo Commands
+
+```bash
+# Create new project
+cargo new project-name
+cargo init  # In existing directory
+
+# Build
+cargo build                    # Debug build
+cargo build --release         # Optimized build
+cargo build --target <TARGET> # Cross-compile
+
+# Run
+cargo run                     # Debug mode
+cargo run --release          # Release mode
+cargo run --bin binary-name  # Specific binary
+
+# Test
+cargo test                   # Run all tests
+cargo test test_name         # Run specific test
+cargo test --lib             # Test library only
+cargo test --doc             # Test documentation examples
+cargo test -- --nocapture    # Show println! output
+
+# Check (fast compilation check)
+cargo check                  # Check all
+cargo check --all-targets    # Check all targets
+
+# Clean
+cargo clean                  # Remove build artifacts
+
+# Documentation
+cargo doc                    # Build docs
+cargo doc --open            # Build and open
+
+# Format and Lint
+cargo fmt                   # Format code
+cargo fmt -- --check       # Check formatting
+cargo clippy               # Run linter
+cargo clippy -- -D warnings # Treat warnings as errors
+
+# Install binary
+cargo install package-name
+cargo install --path .     # Install from local path
+
+# Uninstall
+cargo uninstall package-name
+
+# Search crates
+cargo search pattern
+
+# Show info about package
+cargo info package-name
+
+# Add dependency
+cargo add serde
+cargo add tokio --features full
+
+# Remove dependency
+cargo rm package-name
+
+# Update dependencies
+cargo update               # Update all
+cargo update -p package   # Update specific package
+
+# Verify project
+cargo verify-project
+
+# Generate Cargo.lock
+cargo generate-lockfile
+
+# Package for publishing
+cargo package
+
+# Publish to crates.io
+cargo publish
+```
+
+## Project Structure
+
+### Simple Binary Project
+```
+my-project/
+├── src/
+│   └── main.rs
+├── Cargo.toml
+├── Cargo.lock
+├── .gitignore
+└── target/
+    ├── debug/
+    │   └── my-project
+    └── release/
+        └── my-project
+```
+
+### Library Project
+```
+my-library/
+├── src/
+│   └── lib.rs
+├── Cargo.toml
+├── Cargo.lock
+└── target/
+```
+
+### Project with Binary and Library
+```
+my-project/
+├── src/
+│   ├── main.rs      # Binary entry point
+│   ├── lib.rs       # Library root
+│   └── modules/
+│       ├── mod.rs
+│       └── utils.rs
+├── Cargo.toml
+└── target/
+```
+
+### Multiple Binaries
+```
+my-project/
+├── src/
+│   ├── main.rs          # Default binary
+│   ├── lib.rs           # Library
+│   └── bin/
+│       ├── tool1.rs     # Additional binary
+│       └── tool2.rs     # Additional binary
+├── Cargo.toml
+└── target/
+```
+
+### Complete Project Structure
+```
+my-project/
+├── src/
+│   ├── main.rs
+│   ├── lib.rs
+│   └── modules/
+│       ├── mod.rs
+│       ├── config.rs
+│       └── utils.rs
+├── tests/
+│   ├── integration_test.rs
+│   └── common/
+│       └── mod.rs
+├── benches/
+│   └── benchmark.rs
+├── examples/
+│   └── example.rs
+├── target/
+├── Cargo.toml
+├── Cargo.lock
+├── .gitignore
+├── README.md
+├── LICENSE
+└── .github/
+    └── workflows/
+        └── rust.yml
+```
+
+### Sample Cargo.toml
+```toml
+[package]
+name = "my-project"
+version = "0.1.0"
+edition = "2021"           # Rust edition (2015, 2018, 2021)
+authors = ["Your Name <you@example.com>"]
+description = "A short description"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/username/my-project"
+keywords = ["cli", "tool"]
+categories = ["command-line-utilities"]
+readme = "README.md"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.35", features = ["full"] }
+clap = { version = "4.4", features = ["derive"] }
+anyhow = "1.0"
+thiserror = "1.0"
+
+[dev-dependencies]
+criterion = "0.5"
+proptest = "1.4"
+
+[build-dependencies]
+cc = "1.0"
+
+# Multiple binaries
+[[bin]]
+name = "my-app"
+path = "src/main.rs"
+
+[[bin]]
+name = "helper"
+path = "src/bin/helper.rs"
+
+[lib]
+name = "myproject"
+path = "src/lib.rs"
+
+# Profile for development
+[profile.dev]
+opt-level = 0
+debug = true
+
+# Profile for release
+[profile.release]
+opt-level = 3
+lto = true        # Link-time optimization
+codegen-units = 1 # Better optimization, slower compile
+
+# Profile for testing
+[profile.test]
+opt-level = 0
+
+# Features
+[features]
+default = ["feature1"]
+feature1 = []
+feature2 = ["dep:optional-dep"]
+
+# Workspace (for multiple crates)
+[workspace]
+members = [
+    "crate1",
+    "crate2",
+]
+
+# Patch dependencies (for local development)
+[patch.crates-io]
+# my-dep = { path = "../my-dep" }
+```
+
+### Sample .gitignore (Rust)
+```
+# Build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Cargo lock file (commit for binaries, ignore for libraries)
+# Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Generated files
+*.o
+*.so
+*.dylib
+*.dll
+*.exe
+```
+
+## Workspace (Monorepo)
+
+### Workspace Structure
+```
+my-workspace/
+├── Cargo.toml          # Workspace root
+├── Cargo.lock
+├── crate1/
+│   ├── Cargo.toml
+│   └── src/
+│       └── lib.rs
+├── crate2/
+│   ├── Cargo.toml
+│   └── src/
+│       └── lib.rs
+└── app/
+    ├── Cargo.toml
+    └── src/
+        └── main.rs
+```
+
+### Root Cargo.toml for Workspace
+```toml
+[workspace]
+members = [
+    "crate1",
+    "crate2",
+    "app",
+]
+
+# Shared dependencies across workspace
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.35", features = ["full"] }
+
+# Workspace-wide settings
+[workspace.package]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+```
+
+### Member Crate Cargo.toml
+```toml
+[package]
+name = "crate1"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+crate2 = { path = "../crate2" }
+```
+
+## Where is the Documentation
+
+### Official Documentation
+
+1. **The Rust Programming Language (The Book)** - https://doc.rust-lang.org/book/
+   - Official book, comprehensive introduction
+   - Best place to start learning Rust
+
+2. **Rust by Example** - https://doc.rust-lang.org/rust-by-example/
+   - Learn by running examples
+   - Practical approach
+
+3. **The Rust Reference** - https://doc.rust-lang.org/reference/
+   - Formal language specification
+   - Detailed syntax and semantics
+
+4. **Standard Library Documentation** - https://doc.rust-lang.org/std/
+   - Complete std library docs
+   - Search by type, trait, or module
+
+5. **The Cargo Book** - https://doc.rust-lang.org/cargo/
+   - Official Cargo documentation
+   - Package management guide
+
+6. **The Rustonomicon** - https://doc.rust-lang.org/nomicon/
+   - Unsafe Rust
+   - Advanced topics
+
+7. **The Rust Async Book** - https://rust-lang.github.io/async-book/
+   - Asynchronous programming
+   - Async/await
+
+### Learning Resources
+
+1. **Rust Documentation** - https://www.rust-lang.org/learn
+   - Central hub for learning resources
+   - Official learning paths
+
+2. **Rustlings** - https://github.com/rust-lang/rustlings
+   - Small exercises to get started
+   - Interactive learning
+
+3. **Exercism Rust Track** - https://exercism.org/tracks/rust
+   - Practice exercises with mentoring
+   - Progressive difficulty
+
+4. **Rust Cookbook** - https://rust-lang-nursery.github.io/rust-cookbook/
+   - Recipes for common tasks
+   - Best practices
+
+5. **Too Many Lists** - https://rust-unofficial.github.io/too-many-lists/
+   - Learn Rust by implementing linked lists
+   - Deep dive into ownership
+
+6. **Comprehensive Rust** - https://google.github.io/comprehensive-rust/
+   - By Google Android team
+   - 4-day course material
+
+### Books
+
+1. **The Rust Programming Language** - By Steve Klabnik & Carol Nichols
+   - Free online and print
+   - Official and authoritative
+
+2. **Programming Rust** - By Jim Blandy, Jason Orendorff & Leonora Tindall
+   - Comprehensive reference
+   - O'Reilly Media
+
+3. **Rust in Action** - By Tim McNamara
+   - Systems programming
+   - Practical projects
+
+4. **Rust for Rustaceans** - By Jon Gjengset
+   - Intermediate/Advanced
+   - Idiomatic Rust
+
+5. **Zero To Production In Rust** - By Luca Palmieri
+   - Backend development
+   - Production-ready web services
+
+6. **Command-Line Rust** - By Ken Youens-Clark
+   - Build CLI tools
+   - Practical approach
+
+### Framework and Library Documentation
+
+1. **Tokio** - https://tokio.rs/
+   - Async runtime
+   - Network applications
+
+2. **Actix Web** - https://actix.rs/
+   - Web framework
+   - High performance
+
+3. **Axum** - https://docs.rs/axum/
+   - Web framework by Tokio team
+   - Modern async
+
+4. **Rocket** - https://rocket.rs/
+   - Web framework
+   - Easy to use
+
+5. **Diesel** - https://diesel.rs/
+   - ORM and query builder
+   - Type-safe SQL
+
+6. **SQLx** - https://github.com/launchbadge/sqlx
+   - Async SQL library
+   - Compile-time checked queries
+
+7. **Serde** - https://serde.rs/
+   - Serialization framework
+   - JSON, YAML, TOML, etc.
+
+8. **Clap** - https://docs.rs/clap/
+   - Command-line argument parser
+   - Feature-rich
+
+### Community Resources
+
+1. **crates.io** - https://crates.io/
+   - Official package registry
+   - Search for libraries
+
+2. **docs.rs** - https://docs.rs/
+   - Automatic documentation hosting
+   - All published crates
+
+3. **lib.rs** - https://lib.rs/
+   - Curated crate catalog
+   - Better search
+
+4. **This Week in Rust** - https://this-week-in-rust.org/
+   - Weekly newsletter
+   - News and updates
+
+5. **Rust Blog** - https://blog.rust-lang.org/
+   - Official Rust blog
+   - Release announcements
+
+### Community and Support
+
+1. **Rust Users Forum** - https://users.rust-lang.org/
+   - Q&A and discussions
+   - Helpful community
+
+2. **Rust Internals Forum** - https://internals.rust-lang.org/
+   - Language development
+   - RFCs and proposals
+
+3. **Stack Overflow** - Tag: `rust`
+   - Q&A for specific problems
+
+4. **Reddit**
+   - r/rust - General Rust
+   - r/learnrust - Learning help
+
+5. **Discord**
+   - Official Rust Discord
+   - Community channels
+
+6. **Zulip** - https://rust-lang.zulipchat.com/
+   - Rust community chat
+   - Organized discussions
+
+### YouTube Channels
+
+1. **Jon Gjengset** - Advanced Rust, live coding
+2. **Ryan Levick** - Microsoft engineer, great tutorials
+3. **Let's Get Rusty** - Beginner-friendly tutorials
+4. **fasterthanlime** - Deep dives into Rust
+5. **No Boilerplate** - Concise Rust videos
+6. **Rust Official** - Conference talks
+
+### Offline Documentation
+
+```bash
+# Open standard library docs
+rustup doc
+
+# Open the book
+rustup doc --book
+
+# Open Rust by Example
+rustup doc --rust-by-example
+
+# Open Cargo book
+rustup doc --cargo
+
+# Open specific crate docs (after cargo build)
+cargo doc --open
+```
+
+## Rust Editions
+
+Rust uses "editions" for backward-compatible language evolution:
+
+- **Rust 2015**: Original edition
+- **Rust 2018**: Improved module system, async/await foundation
+- **Rust 2021**: IntoIterator for arrays, new prelude items, better closures
+- **Rust 2024**: Upcoming edition
+
+### Specify Edition in Cargo.toml
+```toml
+[package]
+edition = "2021"  # Recommended
+```
+
+## Useful Tools
+
+### Install Additional Tools
+
+```bash
+# Code formatter (usually pre-installed)
+rustup component add rustfmt
+
+# Linter (usually pre-installed)
+rustup component add clippy
+
+# cargo-edit (add/rm dependencies)
+cargo install cargo-edit
+
+# cargo-watch (auto-rebuild)
+cargo install cargo-watch
+
+# cargo-expand (expand macros)
+cargo install cargo-expand
+
+# cargo-outdated (check outdated dependencies)
+cargo install cargo-outdated
+
+# cargo-audit (security audit)
+cargo install cargo-audit
+
+# cargo-tree (dependency tree)
+# Built-in since Rust 1.44
+
+# cargo-deny (dependency linting)
+cargo install cargo-deny
+
+# bacon (background checker)
+cargo install bacon
+
+# cross (cross-compilation)
+cargo install cross
+
+# cargo-make (task runner)
+cargo install cargo-make
+
+# ripgrep (grep alternative, written in Rust)
+cargo install ripgrep
+
+# fd (find alternative)
+cargo install fd-find
+
+# bat (cat alternative)
+cargo install bat
+
+# exa (ls alternative)
+cargo install exa
+```
+
+### Using the Tools
+
+```bash
+# Format code
+cargo fmt
+cargo fmt -- --check  # Check without modifying
+
+# Lint code
+cargo clippy
+cargo clippy -- -D warnings  # Treat warnings as errors
+
+# Expand macros
+cargo expand
+
+# Check outdated dependencies
+cargo outdated
+
+# Security audit
+cargo audit
+cargo audit fix  # Try to fix vulnerabilities
+
+# Watch for changes
+cargo watch -x run
+cargo watch -x test
+
+# Run with bacon (TUI)
+bacon
+
+# Cross-compile
+cross build --target aarch64-unknown-linux-gnu
+```
+
+## Best Practices
+
+1. **Use cargo for everything**: Don't use rustc directly for projects
+
+2. **Follow naming conventions**:
+   - Types/Traits: PascalCase (e.g., `MyStruct`)
+   - Functions/Variables: snake_case (e.g., `my_function`)
+   - Constants: SCREAMING_SNAKE_CASE (e.g., `MAX_SIZE`)
+   - Modules: snake_case
+
+3. **Use clippy**: Run regularly to catch common mistakes
+   ```bash
+   cargo clippy
+   ```
+
+4. **Format code**: Use rustfmt consistently
+   ```bash
+   cargo fmt
+   ```
+
+5. **Write tests**: Co-locate with code
+   ```rust
+   #[cfg(test)]
+   mod tests {
+       use super::*;
+       
+       #[test]
+       fn it_works() {
+           assert_eq!(2 + 2, 4);
+       }
+   }
+   ```
+
+6. **Document public APIs**: Use doc comments
+   ```rust
+   /// Returns the sum of two numbers.
+   ///
+   /// # Examples
+   ///
+   /// ```
+   /// assert_eq!(add(2, 3), 5);
+   /// ```
+   pub fn add(a: i32, b: i32) -> i32 {
+       a + b
+   }
+   ```
+
+7. **Use Result for errors**: Don't panic in libraries
+   ```rust
+   use anyhow::Result;
+   
+   fn may_fail() -> Result<String> {
+       Ok("success".to_string())
+   }
+   ```
+
+8. **Prefer iterators**: More idiomatic and often faster
+   ```rust
+   // Instead of
+   let mut sum = 0;
+   for i in 1..11 {
+       sum += i;
+   }
+   
+   // Use
+   let sum: i32 = (1..11).sum();
+   ```
+
+9. **Use type inference**: But add types when clarity helps
+   ```rust
+   let x = 5;  // Type inferred
+   let y: i32 = 5;  // Explicit when needed
+   ```
+
+10. **Avoid unwrap() in production**: Handle errors properly
+    ```rust
+    // Bad
+    let value = some_option.unwrap();
+    
+    // Better
+    let value = some_option.expect("meaningful message");
+    
+    // Best
+    let value = some_option.ok_or_else(|| Error::new())?;
+    ```
+
+11. **Use enums for state**: Type-safe state machines
+
+12. **Prefer owned types**: Unless you need references
+
+13. **Use builder pattern**: For complex constructors
+
+14. **Run tests in CI/CD**: Automated testing
+
+15. **Keep release builds optimized**: Use `--release` for benchmarks
+
+## Common Patterns
+
+### Error Handling
+```rust
+use anyhow::{Result, Context};
+
+fn read_config() -> Result<Config> {
+    let contents = std::fs::read_to_string("config.toml")
+        .context("Failed to read config file")?;
+    
+    let config: Config = toml::from_str(&contents)
+        .context("Failed to parse config")?;
+    
+    Ok(config)
+}
+```
+
+### Builder Pattern
+```rust
+#[derive(Default)]
+struct Person {
+    name: String,
+    age: u32,
+    email: Option<String>,
+}
+
+impl Person {
+    fn builder() -> PersonBuilder {
+        PersonBuilder::default()
+    }
+}
+
+#[derive(Default)]
+struct PersonBuilder {
+    name: Option<String>,
+    age: Option<u32>,
+    email: Option<String>,
+}
+
+impl PersonBuilder {
+    fn name(mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self
+    }
+    
+    fn age(mut self, age: u32) -> Self {
+        self.age = Some(age);
+        self
+    }
+    
+    fn email(mut self, email: impl Into<String>) -> Self {
+        self.email = Some(email.into());
+        self
+    }
+    
+    fn build(self) -> Result<Person> {
+        Ok(Person {
+            name: self.name.ok_or("name is required")?,
+            age: self.age.ok_or("age is required")?,
+            email: self.email,
+        })
+    }
+}
+
+// Usage
+let person = Person::builder()
+    .name("Alice")
+    .age(30)
+    .email("alice@example.com")
+    .build()?;
+```
+
+### Newtype Pattern
+```rust
+struct UserId(u64);
+struct PostId(u64);
+
+// Can't accidentally mix them
+fn get_user(id: UserId) -> User {
+    // ...
+}
+```
+
+### Option/Result Combinators
+```rust
+// Option
+let result = some_option
+    .map(|x| x * 2)
+    .filter(|&x| x > 10)
+    .unwrap_or(0);
+
+// Result
+let result = some_result
+    .map(|x| x + 1)
+    .or_else(|_| Ok(default_value()))
+    .and_then(|x| another_operation(x))?;
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"cargo: command not found"**
+   ```bash
+   # Add to PATH (add to ~/.zshrc or ~/.bashrc)
+   export PATH="$HOME/.cargo/bin:$PATH"
+   
+   # Or source cargo env
+   source "$HOME/.cargo/env"
+   
+   # Restart terminal
+   ```
+
+2. **"linker 'cc' not found" (Linux)**
+   ```bash
+   # Install build essentials
+   sudo apt install build-essential
+   
+   # Or
+   sudo yum groupinstall "Development Tools"
+   ```
+
+3. **"note: LINK : fatal error LNK1181" (Windows)**
+   - Install Visual Studio Build Tools
+   - Or install Visual Studio with C++ workload
+   - Or use rust-gnu toolchain
+
+4. **Slow compilation**
+   ```toml
+   # In Cargo.toml - use fewer codegen units in dev
+   [profile.dev]
+   codegen-units = 256  # Faster compile, slower runtime
+   ```
+   
+   ```bash
+   # Use cargo check instead of cargo build
+   cargo check
+   
+   # Use sccache (caching)
+   cargo install sccache
+   export RUSTC_WRAPPER=sccache
+   ```
+
+5. **"cannot find macro" or "unresolved import"**
+   ```bash
+   # Clean and rebuild
+   cargo clean
+   cargo build
+   
+   # Update rust-analyzer
+   rustup component add rust-analyzer
+   
+   # Reload VSCode window
+   ```
+
+6. **"error: could not compile" with ownership errors**
+   - Read the error messages carefully (Rust has great error messages!)
+   - Use clippy suggestions
+   - Consult The Book on ownership
+
+7. **VSCode rust-analyzer not working**
+   - Check extension is installed
+   - Reload window: Cmd/Ctrl + Shift + P → "Reload Window"
+   - Check output: View → Output → rust-analyzer
+   - Reinstall: `rustup component add rust-analyzer`
+
+8. **"failed to resolve: use of undeclared crate"**
+   ```bash
+   # Add missing dependency to Cargo.toml
+   cargo add dependency-name
+   
+   # Or manually add to [dependencies]
+   ```
+
+9. **"error[E0601]: `main` function not found"**
+   ```rust
+   // Wrong - typo in function name
+   fun main() {  // 'fun' instead of 'fn'
+       println!("Hello");
+   }
+   
+   // Correct
+   fn main() {
+       println!("Hello");
+   }
+   ```
+
+10. **"expected `;`, found keyword"**
+    ```rust
+    // Wrong - missing semicolon
+    fn main() {
+        println!("Hello")  // Missing ;
+    }
+    
+    // Correct
+    fn main() {
+        println!("Hello");  // Semicolon added
+    }
+    ```
+
+11. **"cannot find macro `println` in this scope"**
+    ```rust
+    // Wrong - typo or wrong macro name
+    printline!("Hello");  // Wrong name
+    
+    // Correct
+    println!("Hello");    // Correct name (note the !)
+    ```
+
+12. **"expected `{`, found `(`"**
+    ```rust
+    // Wrong - missing curly braces
+    fn main()
+        println!("Hello");
+    
+    // Correct
+    fn main() {
+        println!("Hello");
+    }
+    ```
+
+13. **Binary size is too large**
+    ```bash
+    # Debug build (large, with debug symbols)
+    rustc hello.rs
+    ls -lh hello  # ~431KB
+    
+    # Release build (optimized, smaller)
+    rustc -O hello.rs
+    ls -lh hello  # ~287KB
+    
+    # Strip debug symbols
+    strip hello
+    ls -lh hello  # ~253KB
+    
+    # With cargo
+    cargo build --release
+    strip target/release/my_app
+    ```
+
+14. **"error: linking with `cc` failed"**
+    ```bash
+    # macOS - Install Xcode Command Line Tools
+    xcode-select --install
+    
+    # Linux - Install build essentials
+    sudo apt install build-essential  # Debian/Ubuntu
+    sudo dnf install gcc              # Fedora
+    
+    # Check if installed
+    cc --version
+    ```
+
+### Practical Troubleshooting Example
+
+**Problem: Trying to compile a simple Rust program**
+
+```bash
+$ rustc 01-hello-world.rs
+error[E0601]: `main` function not found in crate `01_hello_world`
+  |
+  = note: consider adding a `main` function to `01-hello-world.rs`
+```
+
+**Solution:**
+```bash
+# Step 1: Check the file content
+cat 01-hello-world.rs
+# (empty or missing main function)
+
+# Step 2: Create proper Rust program
+cat > 01-hello-world.rs << 'EOF'
+fn main() {
+    println!("Hello world!");
+}
+EOF
+
+# Step 3: Compile
+rustc 01-hello-world.rs
+
+# Step 4: Run
+./01-hello-world
+# Hello world!
+```
+
+**Problem: Program compiles but no output**
+
+```rust
+// bad_program.rs
+fn main() {
+    let message = "Hello world!";
+    // Forgot to print!
+}
+```
+
+**Solution:**
+```rust
+// good_program.rs
+fn main() {
+    let message = "Hello world!";
+    println!("{}", message);  // Add println!
+}
+```
+
+**Problem: Compilation is too slow**
+
+```bash
+$ cargo build
+# Takes minutes for small changes...
+```
+
+**Solution:**
+```bash
+# Use cargo check instead (much faster)
+cargo check  # Only checks for errors, doesn't build binary
+
+# Install sccache for caching
+cargo install sccache
+export RUSTC_WRAPPER=sccache
+
+# Use parallel compilation
+export CARGO_BUILD_JOBS=8
+
+# Reduce codegen units in dev (faster compilation)
+# Add to Cargo.toml:
+[profile.dev]
+codegen-units = 256
+```
+
+**Problem: rust-analyzer not working in VSCode**
+
+```bash
+$ # Code navigation and auto-complete not working
+```
+
+**Solution:**
+```bash
+# Step 1: Install rust-analyzer component
+rustup component add rust-analyzer
+
+# Step 2: Install VSCode extension
+# Open VSCode → Extensions → Search "rust-analyzer" → Install
+
+# Step 3: Reload VSCode window
+# Cmd/Ctrl + Shift + P → "Developer: Reload Window"
+
+# Step 4: Check rust-analyzer is running
+# View → Output → Select "rust-analyzer" from dropdown
+
+# Step 5: If still not working, check Rust installation
+rustc --version
+cargo --version
+```
+
+## Environment Variables
+
+```bash
+# Add Cargo bin to PATH (add to ~/.zshrc or ~/.bashrc)
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# Rust source path (for rust-analyzer)
+export RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/library"
+
+# Rust log level
+export RUST_LOG=debug
+export RUST_LOG=info
+export RUST_LOG=my_crate=trace
+
+# Backtrace on panic
+export RUST_BACKTRACE=1        # Show backtrace
+export RUST_BACKTRACE=full     # Show full backtrace
+
+# Cargo configuration
+export CARGO_HOME="$HOME/.cargo"
+export CARGO_TARGET_DIR="$HOME/.cargo/target"  # Shared target directory
+
+# Use sccache for faster compilation
+export RUSTC_WRAPPER=sccache
+
+# Increase stack size (if needed)
+export RUST_MIN_STACK=8388608
+```
+
+## Quick Start Examples
+
+### Basic Hello World (Using rustc)
+
+**Step 1: Create the Rust source file**
+
+```rust
+// 01-hello-world.rs
+//
+// A simple Rust program to print "Hello world!"
+
+// Main function - entry point of every Rust program
+fn main() {
+    // println! is a macro (note the ! at the end)
+    // Macros are expanded at compile time
+    println!("Hello world!");
+}
+```
+
+**Step 2: Compile the program**
+
+```bash
+# Navigate to the directory
+cd /path/to/rust/lessons
+
+# Compile with rustc (Rust compiler)
+rustc 01-hello-world.rs
+
+# List files to see the compiled binary
+ls -lh
+# -rwxr-xr-x  431K  01-hello-world      (executable)
+# -rw-r--r--  807B  01-hello-world.rs   (source)
+```
+
+**Step 3: Run the executable**
+
+```bash
+# Run the compiled binary
+./01-hello-world
+
+# Expected output:
+# Hello world!
+```
+
+**All in one command:**
+```bash
+rustc 01-hello-world.rs && ./01-hello-world
+```
+
+**Key Points:**
+- ❌ No runtime or VM required (unlike Java, Python)
+- ❌ No garbage collector overhead
+- ❌ No header files (unlike C/C++)
+- ✅ Compiles to native machine code
+- ✅ Memory safety guaranteed at compile time
+- ✅ Excellent error messages
+- ✅ Zero-cost abstractions
+
+### Rust vs Other Languages
+
+**C++ (requires header and manual memory management):**
+```cpp
+#include <iostream>
+
+int main() {
+    std::cout << "Hello world!" << std::endl;
+    return 0;
+}
+```
+```bash
+g++ hello.cpp -o hello
+./hello
+```
+
+**Java (requires JVM and verbose syntax):**
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello world!");
+    }
+}
+```
+```bash
+javac HelloWorld.java  # Compiles to bytecode
+java HelloWorld        # Runs on JVM
+```
+
+**Rust (simple, safe, fast):**
+```rust
+fn main() {
+    println!("Hello world!");
+}
+```
+```bash
+rustc hello.rs  # Compiles to native code
+./hello         # Runs directly on CPU
+```
+
+### Compilation with Optimization
+
+```bash
+# Debug build (default - includes debug symbols)
+rustc 01-hello-world.rs
+ls -lh 01-hello-world  # ~431KB
+
+# Release build (optimized, smaller, faster)
+rustc -O 01-hello-world.rs -o 01-hello-world-release
+ls -lh 01-hello-world-release  # ~287KB
+
+# Maximum optimization
+rustc -C opt-level=3 01-hello-world.rs
+
+# Strip debug symbols for even smaller binary
+strip 01-hello-world
+ls -lh 01-hello-world  # ~253KB
+```
+
+### Understanding println! Macro
+
+```rust
+fn main() {
+    // Basic print
+    println!("Hello world!");
+    
+    // With variables
+    let name = "Alice";
+    println!("Hello {}!", name);
+    
+    // Multiple values
+    println!("{} + {} = {}", 1, 2, 3);
+    
+    // Named parameters
+    println!("Hello {name}!", name = "Bob");
+    
+    // Debug formatting with {:?}
+    let numbers = vec![1, 2, 3];
+    println!("{:?}", numbers);  // [1, 2, 3]
+    
+    // Print to stderr
+    eprintln!("This goes to stderr");
+    
+    // Print without newline
+    print!("No newline");
+    print!(" here\n");
+}
+```
+
+### Hello World with Cargo (Project Management)
+
+**Create a new project:**
+```bash
+# Create new binary project
+cargo new hello-world
+cd hello-world
+
+# Project structure created:
+# hello-world/
+#   ├── Cargo.toml       (manifest file)
+#   ├── src/
+#   │   └── main.rs      (source code)
+#   └── .gitignore
+```
+
+**src/main.rs (automatically created):**
+```rust
+fn main() {
+    println!("Hello, world!");
+}
+```
+
+**Cargo.toml (package manifest):**
+```toml
+[package]
+name = "hello-world"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Add dependencies here
+```
+
+**Build and run:**
+```bash
+# Method 1: Build and run separately
+cargo build                    # Debug build
+./target/debug/hello-world     # Run
+
+# Method 2: Build and run in one command (recommended)
+cargo run                      # Debug build + run
+
+# Method 3: Release build (optimized)
+cargo build --release          # Optimized build
+./target/release/hello-world   # Run optimized version
+
+# Or in one command
+cargo run --release            # Build (optimized) + run
+```
+
+**Other useful Cargo commands:**
+```bash
+# Check for errors without building
+cargo check    # Much faster than build
+
+# Run tests
+cargo test
+
+# Generate documentation
+cargo doc --open
+
+# Clean build artifacts
+cargo clean
+
+# Update dependencies
+cargo update
+
+# Format code
+cargo fmt
+
+# Lint code
+cargo clippy
+```
+
+### Cargo vs rustc
+
+**Use `rustc` for:**
+- Single-file programs
+- Quick experiments
+- Learning basics
+- Simple scripts
+
+**Use `cargo` for:**
+- Real projects
+- Multiple files
+- External dependencies
+- Testing and documentation
+- Publishing crates
+
+**Example: rustc (simple)**
+```bash
+rustc hello.rs
+./hello
+```
+
+**Example: cargo (feature-rich)**
+```bash
+cargo new my-project
+cd my-project
+cargo run
+```
+
+### Simple Function
+```rust
+fn main() {
+    let result = add(5, 3);
+    println!("5 + 3 = {}", result);
+}
+
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_add() {
+        assert_eq!(add(2, 2), 4);
+    }
+}
+```
+
+### Read File
+```rust
+use std::fs;
+
+fn main() -> std::io::Result<()> {
+    let contents = fs::read_to_string("input.txt")?;
+    println!("{}", contents);
+    Ok(())
+}
+```
+
+### Command-Line Tool
+```rust
+use clap::Parser;
+
+#[derive(Parser)]
+#[command(name = "greet")]
+#[command(about = "A simple greeting tool", long_about = None)]
+struct Cli {
+    /// Name to greet
+    #[arg(short, long)]
+    name: String,
+    
+    /// Number of times to greet
+    #[arg(short, long, default_value_t = 1)]
+    count: u8,
+}
+
+fn main() {
+    let cli = Cli::parse();
+    
+    for _ in 0..cli.count {
+        println!("Hello, {}!", cli.name);
+    }
+}
+```
+
+```toml
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+```
+
+```bash
+cargo run -- --name Alice --count 3
+```
+
+### Simple Web Server (Axum)
+```rust
+use axum::{
+    routing::get,
+    Router,
+};
+
+#[tokio::main]
+async fn main() {
+    let app = Router::new()
+        .route("/", get(|| async { "Hello, World!" }));
+    
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    
+    println!("Listening on http://127.0.0.1:3000");
+    axum::serve(listener, app).await.unwrap();
+}
+```
+
+```toml
+[dependencies]
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+```
+
+```bash
+cargo add axum
+cargo add tokio --features full
+cargo run
+```
+
+### Async Programming
+```rust
+use tokio;
+
+#[tokio::main]
+async fn main() {
+    let result = fetch_data().await;
+    println!("Result: {:?}", result);
+}
+
+async fn fetch_data() -> Result<String, Box<dyn std::error::Error>> {
+    let response = reqwest::get("https://api.github.com/users/github")
+        .await?
+        .text()
+        .await?;
+    
+    Ok(response)
+}
+```
+
+```toml
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.11", features = ["json"] }
+```
+
+## Cross-Compilation
+
+```bash
+# List available targets
+rustc --print target-list
+
+# Add target
+rustup target add x86_64-unknown-linux-gnu
+rustup target add x86_64-pc-windows-gnu
+rustup target add aarch64-apple-darwin
+
+# Build for target
+cargo build --target x86_64-unknown-linux-gnu
+cargo build --release --target x86_64-pc-windows-gnu
+
+# Using cross (easier for some targets)
+cargo install cross
+cross build --target armv7-unknown-linux-gnueabihf
+```
+
+## Useful Cargo Configuration
+
+Create `~/.cargo/config.toml`:
+
+```toml
+# Faster linking on macOS
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+# Faster linking on Linux
+[target.x86_64-unknown-linux-gnu]
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+# Use cargo-nextest as default test runner
+[alias]
+t = "nextest run"
+
+# Custom aliases
+b = "build"
+c = "check"
+r = "run"
+t = "test"
+
+# Default features
+[build]
+jobs = 8  # Parallel build jobs
+```

@@ -1,0 +1,21 @@
+# List all lifecycle rules
+cargo run -- list --bucket my-bucket
+
+# Create a rule that transitions to Glacier after 90 days
+cargo run -- create --bucket my-bucket --id archive-old-logs \
+  --prefix logs/ --glacier-days 90
+
+# Create multi-tier archival (30d→IA, 90d→Glacier, 180d→DeepArchive)
+cargo run -- create --bucket my-bucket --id tiered-archive \
+  --ia-days 30 --glacier-days 90 --deep-archive-days 180 \
+  --expiration-days 365
+
+# Archive objects immediately
+cargo run -- archive --bucket my-bucket --prefix old-data/ \
+  --storage-class DEEP_ARCHIVE
+
+# Delete a rule
+cargo run -- delete --bucket my-bucket --id archive-old-logs
+
+# Show rule details
+cargo run -- show --bucket my-bucket --id tiered-archive

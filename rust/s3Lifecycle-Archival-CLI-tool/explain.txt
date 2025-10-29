@@ -1,0 +1,1370 @@
+# Line-by-Line Explanation of s3-tool.rs
+
+## Lines 1-9: Header Comments - Dependency Documentation
+```rust
+// Cargo.toml dependencies needed:
+```
+**Line 1**: Comment indicating the following lines list required dependencies for Cargo.toml
+
+```rust
+// [dependencies]
+```
+**Line 2**: Comment showing the TOML section header where dependencies should be placed
+
+```rust
+// aws-config = "1.1"
+```
+**Line 3**: Dependency for AWS configuration management (loads AWS credentials and region)
+
+```rust
+// aws-sdk-s3 = "1.13"
+```
+**Line 4**: AWS SDK for S3 - provides API to interact with Amazon S3 service
+
+```rust
+// clap = { version = "4.4", features = ["derive"] }
+```
+**Line 5**: Command-line argument parser with derive macros feature for easy CLI building
+
+```rust
+// tokio = { version = "1.35", features = ["full"] }
+```
+**Line 6**: Async runtime for Rust - needed to run async AWS operations with full feature set
+
+```rust
+// serde = { version = "1.0", features = ["derive"] }
+```
+**Line 7**: Serialization/deserialization framework with derive macros
+
+```rust
+// serde_json = "1.0"
+```
+**Line 8**: JSON support for serde (though not actively used in this file)
+
+```rust
+// anyhow = "1.0"
+```
+**Line 9**: Error handling library for easy error propagation with context
+
+---
+
+## Lines 11-16: Import Statements
+
+```rust
+use anyhow::{Context, Result};
+```
+**Line 11**: 
+- Imports `Context` trait: adds `.context()` method to Results for better error messages
+- Imports `Result` type: alias for `Result<T, anyhow::Error>` for simpler error handling
+
+```rust
+use aws_sdk_s3::types::{
+```
+**Line 12**: Begin importing types from AWS S3 SDK types module
+
+```rust
+    LifecycleConfiguration, LifecycleRule, LifecycleRuleFilter, ExpirationStatus,
+```
+**Line 13**: 
+- `LifecycleConfiguration`: Represents complete lifecycle configuration for a bucket
+- `LifecycleRule`: Individual lifecycle rule
+- `LifecycleRuleFilter`: Filter to specify which objects the rule applies to
+- `ExpirationStatus`: Enum for Enabled/Disabled status
+
+```rust
+    Transition, TransitionStorageClass, LifecycleExpiration, NoncurrentVersionTransition,
+```
+**Line 14**:
+- `Transition`: Defines when objects transition to different storage classes
+- `TransitionStorageClass`: Enum of storage classes (GLACIER, DEEP_ARCHIVE, etc.)
+- `LifecycleExpiration`: Defines when objects expire (get deleted)
+- `NoncurrentVersionTransition`: For versioned buckets (imported but not used)
+
+```rust
+    NoncurrentVersionExpiration,
+```
+**Line 15**: Expiration rules for non-current versions (imported but not used)
+
+```rust
+};
+```
+**Line 16**: Closes the import statement
+
+```rust
+use clap::{Parser, Subcommand};
+```
+**Line 17**: 
+- `Parser`: Trait to parse command-line arguments
+- `Subcommand`: Trait for defining subcommands (like list, create, delete)
+
+---
+
+## Lines 19-25: CLI Structure Definition
+
+```rust
+#[derive(Parser)]
+```
+**Line 19**: Derive macro that automatically implements Parser trait for the struct
+
+```rust
+#[command(name = "s3-lifecycle")]
+```
+**Line 20**: Sets the command name to "s3-lifecycle" (how users invoke the tool)
+
+```rust
+#[command(about = "AWS S3 Lifecycle and Archival Management CLI", long_about = None)]
+```
+**Line 21**: Sets short description for help text; long_about = None means no extended description
+
+```rust
+struct Cli {
+```
+**Line 22**: Defines the main CLI structure
+
+```rust
+    #[command(subcommand)]
+```
+**Line 23**: Indicates this field contains subcommands
+
+```rust
+    command: Commands,
+```
+**Line 24**: Field holding the subcommand chosen by the user
+
+```rust
+}
+```
+**Line 25**: Closes the Cli struct definition
+
+---
+
+## Lines 27-92: Commands Enum - Subcommand Definitions
+
+```rust
+#[derive(Subcommand)]
+```
+**Line 27**: Derive macro to implement Subcommand trait
+
+```rust
+enum Commands {
+```
+**Line 28**: Enum defining all possible subcommands
+
+### List Subcommand (Lines 29-34)
+
+```rust
+    /// List all lifecycle rules for a bucket
+```
+**Line 29**: Doc comment - appears in help text
+
+```rust
+    List {
+```
+**Line 30**: Defines "list" subcommand variant
+
+```rust
+        /// S3 bucket name
+```
+**Line 31**: Doc comment for the bucket parameter
+
+```rust
+        #[arg(short, long)]
+```
+**Line 32**: 
+- `short`: enables `-b` flag
+- `long`: enables `--bucket` flag
+
+```rust
+        bucket: String,
+```
+**Line 33**: Bucket parameter - required String argument
+
+```rust
+    },
+```
+**Line 34**: Closes List variant
+
+### Create Subcommand (Lines 35-61)
+
+```rust
+    /// Create a new lifecycle rule
+```
+**Line 35**: Doc comment for create subcommand
+
+```rust
+    Create {
+```
+**Line 36**: Create subcommand variant
+
+```rust
+        /// S3 bucket name
+        #[arg(short, long)]
+        bucket: String,
+```
+**Lines 37-39**: Bucket name parameter (same as List)
+
+```rust
+        /// Rule ID
+        #[arg(short, long)]
+        id: String,
+```
+**Lines 40-42**: Rule ID parameter - unique identifier for the lifecycle rule
+
+```rust
+        /// Prefix filter (optional)
+        #[arg(short, long)]
+        prefix: Option<String>,
+```
+**Lines 43-45**: Optional prefix - only objects with this prefix will be affected
+- `Option<String>` means this argument is optional
+
+```rust
+        /// Days until transition to STANDARD_IA
+        #[arg(long)]
+        ia_days: Option<i32>,
+```
+**Lines 46-48**: Optional number of days before transitioning to Infrequent Access storage
+- Only has `long` flag (--ia-days), no short flag
+
+```rust
+        /// Days until transition to GLACIER
+        #[arg(long)]
+        glacier_days: Option<i32>,
+```
+**Lines 49-51**: Optional days before transitioning to Glacier storage
+
+```rust
+        /// Days until transition to DEEP_ARCHIVE
+        #[arg(long)]
+        deep_archive_days: Option<i32>,
+```
+**Lines 52-54**: Optional days before transitioning to Deep Archive (cheapest, slowest)
+
+```rust
+        /// Days until expiration (deletion)
+        #[arg(long)]
+        expiration_days: Option<i32>,
+```
+**Lines 55-57**: Optional days before objects are permanently deleted
+
+```rust
+        /// Enable the rule
+        #[arg(long, default_value = "true")]
+        enabled: bool,
+```
+**Lines 58-60**: Whether rule is enabled - defaults to true
+
+```rust
+    },
+```
+**Line 61**: Closes Create variant
+
+### Delete Subcommand (Lines 62-70)
+
+```rust
+    /// Delete a lifecycle rule
+    Delete {
+        /// S3 bucket name
+        #[arg(short, long)]
+        bucket: String,
+        /// Rule ID to delete
+        #[arg(short, long)]
+        id: String,
+    },
+```
+**Lines 62-70**: Delete subcommand - removes a lifecycle rule by ID
+
+### Show Subcommand (Lines 71-79)
+
+```rust
+    /// Show lifecycle rule details
+    Show {
+        /// S3 bucket name
+        #[arg(short, long)]
+        bucket: String,
+        /// Rule ID to show
+        #[arg(short, long)]
+        id: String,
+    },
+```
+**Lines 71-79**: Show subcommand - displays details of a specific rule
+
+### Archive Subcommand (Lines 80-91)
+
+```rust
+    /// Archive objects with a specific prefix immediately
+    Archive {
+```
+**Lines 80-81**: Archive subcommand - immediately move objects to archive storage
+
+```rust
+        /// S3 bucket name
+        #[arg(short, long)]
+        bucket: String,
+```
+**Lines 82-84**: Bucket parameter
+
+```rust
+        /// Prefix to archive
+        #[arg(short, long)]
+        prefix: String,
+```
+**Lines 85-87**: Prefix - which objects to archive (required)
+
+```rust
+        /// Target storage class (GLACIER, DEEP_ARCHIVE, GLACIER_IR)
+        #[arg(short, long, default_value = "GLACIER")]
+        storage_class: String,
+```
+**Lines 88-90**: Target storage class - defaults to GLACIER if not specified
+
+```rust
+    },
+```
+**Line 91**: Closes Archive variant
+
+```rust
+}
+```
+**Line 92**: Closes Commands enum
+
+---
+
+## Lines 94-136: Main Function - Entry Point
+
+```rust
+#[tokio::main]
+```
+**Line 94**: Macro that transforms async main into a normal main with tokio runtime
+
+```rust
+async fn main() -> Result<()> {
+```
+**Line 95**: 
+- `async`: Function uses async/await
+- `Result<()>`: Returns Ok(()) on success, Err on failure
+- `()` means no value returned on success
+
+```rust
+    let cli = Cli::parse();
+```
+**Line 96**: Parse command-line arguments into Cli struct
+
+```rust
+    
+    let config = aws_config::load_from_env().await;
+```
+**Line 98**: 
+- Load AWS configuration from environment variables
+- Reads AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, etc.
+- `.await` because this is an async operation
+
+```rust
+    let client = aws_sdk_s3::Client::new(&config);
+```
+**Line 99**: Create S3 client using the loaded configuration
+
+```rust
+
+    match cli.command {
+```
+**Line 101**: Pattern match on the subcommand the user chose
+
+```rust
+        Commands::List { bucket } => list_lifecycle_rules(&client, &bucket).await?,
+```
+**Line 102**: 
+- If List command, destructure to get bucket name
+- Call list_lifecycle_rules function
+- `&client`: borrow the client
+- `&bucket`: borrow the bucket string
+- `.await?`: await the result and propagate error if any
+
+```rust
+        Commands::Create {
+            bucket,
+            id,
+            prefix,
+            ia_days,
+            glacier_days,
+            deep_archive_days,
+            expiration_days,
+            enabled,
+        } => {
+```
+**Lines 103-112**: Destructure all Create command parameters
+
+```rust
+            create_lifecycle_rule(
+                &client,
+                &bucket,
+                &id,
+                prefix.as_deref(),
+                ia_days,
+                glacier_days,
+                deep_archive_days,
+                expiration_days,
+                enabled,
+            )
+            .await?
+        }
+```
+**Lines 113-125**: 
+- Call create_lifecycle_rule with all parameters
+- `prefix.as_deref()`: converts `Option<String>` to `Option<&str>`
+- Other Option values (ia_days, etc.) are copied since i32 and bool implement Copy
+- `.await?`: await and propagate errors
+
+```rust
+        Commands::Delete { bucket, id } => delete_lifecycle_rule(&client, &bucket, &id).await?,
+```
+**Line 126**: Delete command - call delete function
+
+```rust
+        Commands::Show { bucket, id } => show_lifecycle_rule(&client, &bucket, &id).await?,
+```
+**Line 127**: Show command - call show function
+
+```rust
+        Commands::Archive {
+            bucket,
+            prefix,
+            storage_class,
+        } => archive_objects(&client, &bucket, &prefix, &storage_class).await?,
+```
+**Lines 128-132**: Archive command - call archive function with all parameters
+
+```rust
+    }
+```
+**Line 133**: Close match expression
+
+```rust
+
+    Ok(())
+```
+**Line 135**: Return success (no errors occurred)
+
+```rust
+}
+```
+**Line 136**: Close main function
+
+---
+
+## Lines 138-172: list_lifecycle_rules Function
+
+```rust
+async fn list_lifecycle_rules(client: &aws_sdk_s3::Client, bucket: &str) -> Result<()> {
+```
+**Line 138**: 
+- Async function to list all lifecycle rules
+- Takes borrowed client and bucket name
+- Returns Result<()>
+
+```rust
+    println!("Fetching lifecycle rules for bucket: {}", bucket);
+```
+**Line 139**: Print informational message
+
+```rust
+    
+    match client
+```
+**Line 141**: Start pattern matching on the API call result
+
+```rust
+        .get_bucket_lifecycle_configuration()
+```
+**Line 142**: Start building get lifecycle configuration request
+
+```rust
+        .bucket(bucket)
+```
+**Line 143**: Specify which bucket to query
+
+```rust
+        .send()
+```
+**Line 144**: Send the request
+
+```rust
+        .await
+```
+**Line 145**: Wait for the response
+
+```rust
+    {
+        Ok(output) => {
+```
+**Lines 146-147**: If successful, bind response to `output`
+
+```rust
+            if let Some(rules) = output.rules {
+```
+**Line 148**: Check if rules exist (Some) and bind them
+
+```rust
+                if rules.is_empty() {
+                    println!("No lifecycle rules found.");
+```
+**Lines 149-150**: If rules vector is empty, print message
+
+```rust
+                } else {
+                    println!("\nLifecycle Rules:");
+                    println!("{:-<80}", "");
+```
+**Lines 151-153**: 
+- Print header
+- Print 80 dashes as separator
+
+```rust
+                    for rule in rules {
+                        print_rule(&rule);
+                    }
+```
+**Lines 154-156**: Loop through each rule and print details
+
+```rust
+                }
+            } else {
+                println!("No lifecycle rules found.");
+            }
+```
+**Lines 157-160**: If rules is None, print message
+
+```rust
+        }
+        Err(e) => {
+```
+**Lines 161-162**: If API call failed, bind error to `e`
+
+```rust
+            if e.to_string().contains("NoSuchLifecycleConfiguration") {
+                println!("No lifecycle configuration found for this bucket.");
+```
+**Lines 163-164**: If specific error (no config exists), print friendly message
+
+```rust
+            } else {
+                return Err(e.into());
+```
+**Lines 165-166**: For other errors, convert to anyhow::Error and return
+
+```rust
+            }
+        }
+    }
+```
+**Lines 167-169**: Close error handling and match
+
+```rust
+    
+    Ok(())
+```
+**Line 171**: Return success
+
+```rust
+}
+```
+**Line 172**: Close function
+
+---
+
+## Lines 174-275: create_lifecycle_rule Function
+
+```rust
+async fn create_lifecycle_rule(
+    client: &aws_sdk_s3::Client,
+    bucket: &str,
+    id: &str,
+    prefix: Option<&str>,
+    ia_days: Option<i32>,
+    glacier_days: Option<i32>,
+    deep_archive_days: Option<i32>,
+    expiration_days: Option<i32>,
+    enabled: bool,
+) -> Result<()> {
+```
+**Lines 174-184**: Function signature with all parameters needed to create a lifecycle rule
+
+```rust
+    // Get existing rules
+    let mut existing_rules = match client
+```
+**Lines 185-186**: 
+- Comment explaining next section
+- Start getting existing rules, make mutable to modify later
+
+```rust
+        .get_bucket_lifecycle_configuration()
+        .bucket(bucket)
+        .send()
+        .await
+```
+**Lines 187-190**: API call to get current lifecycle configuration
+
+```rust
+    {
+        Ok(output) => output.rules.unwrap_or_default(),
+```
+**Lines 191-192**: 
+- If successful, get rules or empty vector if None
+- `unwrap_or_default()` returns `vec![]` if rules is None
+
+```rust
+        Err(_) => vec![],
+```
+**Line 193**: If error (e.g., no config exists), start with empty vector
+
+```rust
+    };
+```
+**Line 194**: Close match expression
+
+```rust
+
+    // Build transitions
+    let mut transitions = Vec::new();
+```
+**Lines 196-197**: 
+- Comment
+- Create mutable empty vector for transition rules
+
+```rust
+    
+    if let Some(days) = ia_days {
+```
+**Line 199**: If ia_days was provided (Some), bind value to `days`
+
+```rust
+        transitions.push(
+            Transition::builder()
+                .days(days)
+                .storage_class(TransitionStorageClass::StandardIa)
+                .build(),
+        );
+    }
+```
+**Lines 200-206**: 
+- Create Transition using builder pattern
+- Set number of days
+- Set storage class to Standard-IA (Infrequent Access)
+- Build and push to transitions vector
+
+```rust
+    
+    if let Some(days) = glacier_days {
+        transitions.push(
+            Transition::builder()
+                .days(days)
+                .storage_class(TransitionStorageClass::Glacier)
+                .build(),
+        );
+    }
+```
+**Lines 208-215**: Same as above but for Glacier storage class
+
+```rust
+    
+    if let Some(days) = deep_archive_days {
+        transitions.push(
+            Transition::builder()
+                .days(days)
+                .storage_class(TransitionStorageClass::DeepArchive)
+                .build(),
+        );
+    }
+```
+**Lines 217-224**: Same as above but for Deep Archive storage class
+
+```rust
+
+    // Build filter
+    let filter = if let Some(p) = prefix {
+        LifecycleRuleFilter::Prefix(p.to_string())
+```
+**Lines 226-228**: 
+- Comment
+- If prefix provided, create filter with that prefix
+- Convert &str to String
+
+```rust
+    } else {
+        LifecycleRuleFilter::Prefix(String::new())
+    };
+```
+**Lines 229-231**: If no prefix, create filter with empty string (applies to all objects)
+
+```rust
+
+    // Build rule
+    let mut rule_builder = LifecycleRule::builder()
+        .id(id)
+        .filter(filter)
+        .status(if enabled {
+            ExpirationStatus::Enabled
+        } else {
+            ExpirationStatus::Disabled
+        });
+```
+**Lines 233-241**: 
+- Start building the lifecycle rule
+- Set rule ID
+- Set filter
+- Set status based on enabled parameter
+
+```rust
+
+    for transition in transitions {
+        rule_builder = rule_builder.transitions(transition);
+    }
+```
+**Lines 243-245**: 
+- Loop through all transitions we created
+- Add each transition to the rule builder
+- Reassign rule_builder since .transitions() consumes and returns a new builder
+
+```rust
+
+    if let Some(days) = expiration_days {
+        rule_builder = rule_builder.expiration(
+            LifecycleExpiration::builder().days(days).build(),
+        );
+    }
+```
+**Lines 247-251**: 
+- If expiration days provided
+- Create expiration configuration
+- Add to rule builder
+
+```rust
+
+    let new_rule = rule_builder.build()?;
+```
+**Line 253**: 
+- Build the final rule
+- `?` propagates error if build fails
+
+```rust
+
+    // Remove existing rule with same ID if it exists
+    existing_rules.retain(|r| r.id.as_deref() != Some(id));
+```
+**Lines 255-256**: 
+- Comment
+- Keep only rules that don't have the same ID
+- `retain` filters in place
+- `r.id.as_deref()` converts `Option<String>` to `Option<&str>` for comparison
+
+```rust
+    existing_rules.push(new_rule);
+```
+**Line 257**: Add the new rule to the vector
+
+```rust
+
+    // Apply configuration
+    let lifecycle_config = LifecycleConfiguration::builder()
+        .set_rules(Some(existing_rules))
+        .build()?;
+```
+**Lines 259-262**: 
+- Create complete lifecycle configuration
+- Set all rules (existing + new)
+- Build configuration, propagate error if fails
+
+```rust
+
+    client
+        .put_bucket_lifecycle_configuration()
+        .bucket(bucket)
+        .lifecycle_configuration(lifecycle_config)
+        .send()
+        .await
+        .context("Failed to create lifecycle rule")?;
+```
+**Lines 264-270**: 
+- Build and send API request to update lifecycle configuration
+- `.context()` adds error message if this fails
+- `?` propagates error
+
+```rust
+
+    println!("✓ Lifecycle rule '{}' created successfully for bucket '{}'", id, bucket);
+```
+**Line 272**: Print success message with checkmark
+
+```rust
+    
+    Ok(())
+```
+**Line 274**: Return success
+
+```rust
+}
+```
+**Line 275**: Close function
+
+---
+
+## Lines 277-323: delete_lifecycle_rule Function
+
+```rust
+async fn delete_lifecycle_rule(client: &aws_sdk_s3::Client, bucket: &str, id: &str) -> Result<()> {
+```
+**Line 277**: Function to delete a specific lifecycle rule by ID
+
+```rust
+    // Get existing rules
+    let output = client
+        .get_bucket_lifecycle_configuration()
+        .bucket(bucket)
+        .send()
+        .await
+        .context("Failed to get lifecycle configuration")?;
+```
+**Lines 278-284**: 
+- Get current lifecycle configuration
+- Add context for better error messages
+- `?` propagates error if fails
+
+```rust
+
+    let mut rules = output.rules.unwrap_or_default();
+```
+**Line 286**: Get rules vector or empty vector if None, make mutable
+
+```rust
+    
+    let original_len = rules.len();
+```
+**Line 288**: Save original length to check if rule was found
+
+```rust
+    rules.retain(|r| r.id.as_deref() != Some(id));
+```
+**Line 289**: Remove the rule with matching ID
+
+```rust
+
+    if rules.len() == original_len {
+        println!("Rule '{}' not found.", id);
+        return Ok(());
+    }
+```
+**Lines 291-294**: 
+- If length unchanged, rule wasn't found
+- Print message and return early
+
+```rust
+
+    if rules.is_empty() {
+```
+**Line 296**: If no rules left after deletion
+
+```rust
+        // Delete entire lifecycle configuration if no rules left
+        client
+            .delete_bucket_lifecycle()
+            .bucket(bucket)
+            .send()
+            .await
+            .context("Failed to delete lifecycle configuration")?;
+```
+**Lines 297-303**: 
+- Comment explaining logic
+- Delete entire lifecycle configuration (cleaner than empty config)
+- Add context and propagate errors
+
+```rust
+        println!("✓ All lifecycle rules deleted from bucket '{}'", bucket);
+```
+**Line 304**: Print success message
+
+```rust
+    } else {
+```
+**Line 305**: If there are remaining rules
+
+```rust
+        // Update with remaining rules
+        let lifecycle_config = LifecycleConfiguration::builder()
+            .set_rules(Some(rules))
+            .build()?;
+```
+**Lines 306-309**: 
+- Build new configuration with remaining rules
+- Propagate build errors
+
+```rust
+
+        client
+            .put_bucket_lifecycle_configuration()
+            .bucket(bucket)
+            .lifecycle_configuration(lifecycle_config)
+            .send()
+            .await
+            .context("Failed to update lifecycle configuration")?;
+```
+**Lines 311-317**: Update bucket with new configuration
+
+```rust
+        
+        println!("✓ Lifecycle rule '{}' deleted from bucket '{}'", id, bucket);
+```
+**Line 319**: Print success message
+
+```rust
+    }
+```
+**Line 320**: Close else block
+
+```rust
+
+    Ok(())
+```
+**Line 322**: Return success
+
+```rust
+}
+```
+**Line 323**: Close function
+
+---
+
+## Lines 325-346: show_lifecycle_rule Function
+
+```rust
+async fn show_lifecycle_rule(client: &aws_sdk_s3::Client, bucket: &str, id: &str) -> Result<()> {
+```
+**Line 325**: Function to display details of a specific rule
+
+```rust
+    let output = client
+        .get_bucket_lifecycle_configuration()
+        .bucket(bucket)
+        .send()
+        .await
+        .context("Failed to get lifecycle configuration")?;
+```
+**Lines 326-331**: Get lifecycle configuration, propagate errors with context
+
+```rust
+
+    if let Some(rules) = output.rules {
+```
+**Line 333**: If rules exist, bind them
+
+```rust
+        if let Some(rule) = rules.iter().find(|r| r.id.as_deref() == Some(id)) {
+```
+**Line 334**: 
+- Iterate through rules
+- Find first rule where ID matches
+- `iter()`: creates iterator
+- `find()`: returns Option<&LifecycleRule>
+
+```rust
+            println!("\nLifecycle Rule Details:");
+            println!("{:-<80}", "");
+```
+**Lines 335-336**: Print header with separator line
+
+```rust
+            print_rule(rule);
+```
+**Line 337**: Call helper function to print rule details
+
+```rust
+        } else {
+            println!("Rule '{}' not found.", id);
+        }
+```
+**Lines 338-340**: If find returned None, rule doesn't exist
+
+```rust
+    } else {
+        println!("No lifecycle rules found.");
+    }
+```
+**Lines 341-343**: If output.rules is None, no rules exist
+
+```rust
+
+    Ok(())
+```
+**Line 345**: Return success
+
+```rust
+}
+```
+**Line 346**: Close function
+
+---
+
+## Lines 348-416: archive_objects Function
+
+```rust
+async fn archive_objects(
+    client: &aws_sdk_s3::Client,
+    bucket: &str,
+    prefix: &str,
+    storage_class: &str,
+) -> Result<()> {
+```
+**Lines 348-353**: Function to immediately archive objects with a specific prefix
+
+```rust
+    println!("Archiving objects with prefix '{}' to {}", prefix, storage_class);
+```
+**Line 354**: Print informational message
+
+```rust
+
+    let storage_class_enum = match storage_class.to_uppercase().as_str() {
+```
+**Line 356**: 
+- Convert storage class string to uppercase
+- Match against valid values
+
+```rust
+        "GLACIER" => TransitionStorageClass::Glacier,
+        "DEEP_ARCHIVE" => TransitionStorageClass::DeepArchive,
+        "GLACIER_IR" => TransitionStorageClass::GlacierIr,
+```
+**Lines 357-359**: Map string to enum value
+
+```rust
+        _ => {
+            println!("Invalid storage class. Use: GLACIER, DEEP_ARCHIVE, or GLACIER_IR");
+            return Ok(());
+        }
+    };
+```
+**Lines 360-364**: 
+- Default case for invalid input
+- Print error message
+- Return early (not a fatal error)
+
+```rust
+
+    // List objects with prefix
+    let mut continuation_token = None;
+```
+**Lines 366-367**: 
+- Comment
+- Initialize continuation token for pagination (starts as None)
+
+```rust
+    let mut total_objects = 0;
+```
+**Line 368**: Counter for archived objects
+
+```rust
+
+    loop {
+```
+**Line 370**: Infinite loop - will break when all pages processed
+
+```rust
+        let mut list_req = client
+            .list_objects_v2()
+            .bucket(bucket)
+            .prefix(prefix)
+            .max_keys(1000);
+```
+**Lines 371-375**: 
+- Start building list objects request
+- Use v2 API
+- Set bucket and prefix
+- Limit to 1000 objects per request (max allowed)
+- Make mutable to potentially add continuation token
+
+```rust
+
+        if let Some(token) = continuation_token {
+            list_req = list_req.continuation_token(token);
+        }
+```
+**Lines 377-379**: 
+- If continuation token exists (not first page)
+- Add it to request to get next page
+
+```rust
+
+        let list_output = list_req
+            .send()
+            .await
+            .context("Failed to list objects")?;
+```
+**Lines 381-384**: Send request, await response, propagate errors
+
+```rust
+
+        if let Some(contents) = list_output.contents {
+```
+**Line 386**: If objects found, bind them to `contents`
+
+```rust
+            for object in contents {
+```
+**Line 387**: Loop through each object
+
+```rust
+                if let Some(key) = object.key {
+```
+**Line 388**: If object has a key (should always be true), bind it
+
+```rust
+                    // Copy object to same location with new storage class
+                    client
+                        .copy_object()
+                        .bucket(bucket)
+                        .key(&key)
+                        .copy_source(format!("{}/{}", bucket, key))
+                        .storage_class(storage_class_enum.clone())
+                        .metadata_directive(aws_sdk_s3::types::MetadataDirective::Copy)
+                        .send()
+                        .await
+                        .context(format!("Failed to archive object: {}", key))?;
+```
+**Lines 389-399**: 
+- Comment explaining the approach
+- Use copy_object API to "copy" object to itself
+- This changes the storage class
+- `.copy_source()`: source is same bucket/key
+- `.storage_class()`: new storage class
+- `.clone()`: clone the enum value (cheap)
+- `.metadata_directive(Copy)`: preserve existing metadata
+- Add object-specific error context
+
+```rust
+
+                    total_objects += 1;
+```
+**Line 401**: Increment counter
+
+```rust
+                    println!("  ✓ Archived: {}", key);
+```
+**Line 402**: Print success for this object (indented)
+
+```rust
+                }
+            }
+        }
+```
+**Lines 403-405**: Close if-let blocks
+
+```rust
+
+        if list_output.is_truncated == Some(true) {
+```
+**Line 407**: If response indicates more pages exist
+
+```rust
+            continuation_token = list_output.next_continuation_token;
+```
+**Line 408**: Save token for next iteration
+
+```rust
+        } else {
+            break;
+```
+**Lines 409-410**: 
+- If no more pages
+- Break out of infinite loop
+
+```rust
+        }
+    }
+```
+**Lines 411-412**: Close if-else and loop
+
+```rust
+
+    println!("\n✓ Archived {} objects to {}", total_objects, storage_class);
+```
+**Line 414**: Print summary with total count
+
+```rust
+    Ok(())
+```
+**Line 415**: Return success
+
+```rust
+}
+```
+**Line 416**: Close function
+
+---
+
+## Lines 418-449: print_rule Helper Function
+
+```rust
+fn print_rule(rule: &LifecycleRule) {
+```
+**Line 418**: 
+- Helper function to display rule details
+- Note: Not async (doesn't need to be)
+- Takes borrowed LifecycleRule
+
+```rust
+    println!("\nRule ID: {}", rule.id().unwrap_or("N/A"));
+```
+**Line 419**: 
+- Print rule ID
+- `.id()` returns `Option<&str>`
+- `unwrap_or("N/A")` provides default if None
+
+```rust
+    println!("Status: {:?}", rule.status());
+```
+**Line 420**: 
+- Print status (Enabled or Disabled)
+- `{:?}` uses Debug format
+
+```rust
+    
+    if let Some(filter) = &rule.filter {
+```
+**Line 422**: If filter exists, borrow it
+
+```rust
+        match filter {
+```
+**Line 423**: Match on filter type
+
+```rust
+            LifecycleRuleFilter::Prefix(p) => {
+```
+**Line 424**: If filter is a prefix filter, bind prefix string to `p`
+
+```rust
+                if !p.is_empty() {
+                    println!("Prefix: {}", p);
+                }
+```
+**Lines 425-427**: 
+- Only print prefix if not empty string
+- Empty string means applies to all objects
+
+```rust
+            }
+            _ => println!("Filter: {:?}", filter),
+```
+**Lines 428-429**: 
+- For other filter types (Tag, And, etc.)
+- Print using Debug format
+
+```rust
+        }
+    }
+```
+**Lines 430-431**: Close match and if-let
+
+```rust
+
+    if let Some(transitions) = &rule.transitions {
+```
+**Line 433**: If rule has transitions, borrow them
+
+```rust
+        println!("\nTransitions:");
+```
+**Line 434**: Print header
+
+```rust
+        for t in transitions {
+```
+**Line 435**: Loop through each transition
+
+```rust
+            if let Some(days) = t.days {
+```
+**Line 436**: If transition has days specified, bind value
+
+```rust
+                println!("  - After {} days → {:?}", days, t.storage_class);
+```
+**Line 437**: 
+- Print transition details with indentation
+- Arrow shows transition direction
+- `{:?}` prints storage class enum
+
+```rust
+            }
+        }
+    }
+```
+**Lines 438-440**: Close if-let blocks
+
+```rust
+
+    if let Some(expiration) = &rule.expiration {
+```
+**Line 442**: If rule has expiration, borrow it
+
+```rust
+        if let Some(days) = expiration.days {
+```
+**Line 443**: If expiration has days specified, bind value
+
+```rust
+            println!("\nExpiration: {} days", days);
+```
+**Line 444**: Print expiration days
+
+```rust
+        }
+    }
+```
+**Lines 445-446**: Close if-let blocks
+
+```rust
+
+    println!("{:-<80}", "");
+```
+**Line 448**: Print 80 dashes as separator at the end
+
+```rust
+}
+```
+**Line 449**: Close function and end of file
+
+---
+
+## Summary
+
+This Rust program is a comprehensive CLI tool for managing AWS S3 lifecycle policies. Here's what it does:
+
+### Key Concepts Demonstrated:
+
+1. **Async/Await**: Uses tokio runtime for async AWS API calls
+2. **Error Handling**: Uses anyhow for ergonomic error handling with context
+3. **CLI Parsing**: Uses clap with derive macros for elegant command-line interface
+4. **Builder Pattern**: AWS SDK uses builders for constructing complex objects
+5. **Pattern Matching**: Extensive use of match for handling Option and Result types
+6. **Ownership and Borrowing**: Careful use of references to avoid unnecessary cloning
+7. **Iterators**: Uses iterator methods like .find(), .retain() for collection operations
+
+### Main Features:
+
+1. **List**: Display all lifecycle rules for a bucket
+2. **Create**: Create new lifecycle rules with transitions and expiration
+3. **Delete**: Remove specific lifecycle rules
+4. **Show**: Display details of a specific rule
+5. **Archive**: Immediately move objects to archive storage class
+
+### AWS S3 Concepts:
+
+- **Storage Classes**: STANDARD → STANDARD_IA → GLACIER → DEEP_ARCHIVE
+- **Lifecycle Rules**: Automated policies for transitioning or deleting objects
+- **Transitions**: Moving objects to cheaper storage classes over time
+- **Expiration**: Automatically deleting objects after specified time
+- **Prefix Filtering**: Apply rules only to objects with specific prefixes
+
+This tool provides a user-friendly interface for managing S3 object lifecycles, which is essential for cost optimization in AWS.
+
