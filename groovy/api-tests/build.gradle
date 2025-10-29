@@ -1,0 +1,13 @@
+plugins {
+    id 'groovy'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.codehaus.groovy:groovy-all:3.0.21'
+    testImplementation 'org.spockframework:spock-core:2.4-M4-groovy-3.0'
+    testImplementation 'io.rest-assured:rest-assured:5.4.0'
+}
