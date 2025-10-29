@@ -1,0 +1,1725 @@
+# Spock Framework Initial Setup Guide
+
+## What is Spock?
+
+Spock is a testing and specification framework for Java and Groovy applications. Inspired by JUnit, RSpec, jMock, Mockito, Groovy, Scala, Vulcans, and other technologies, Spock combines the power of these tools into one highly expressive and concise testing framework. It features beautiful and highly readable specification language based on BDD (Behavior-Driven Development) principles, built-in mocking and stubbing capabilities, and data-driven testing support.
+
+### Key Features
+- **Expressive specification language**: Given-When-Then blocks
+- **Built-in mocking**: No need for separate mocking frameworks
+- **Data-driven testing**: Parameterized tests with data tables
+- **Groovy-based**: Concise and readable test code
+- **JUnit integration**: Runs with standard JUnit runners
+- **Excellent IDE support**: Works with IntelliJ IDEA, Eclipse, VSCode
+
+## Extensions in VSCode
+
+### Essential Extensions
+
+1. **Extension Pack for Java (Microsoft)** - Required
+   - Includes Language Support, Debugging, Testing
+   - Extension ID: vscjava.vscode-java-pack
+
+2. **Language Support for Java (Red Hat)** - Included in pack
+   - IntelliSense and code navigation
+   - Extension ID: redhat.java
+
+3. **Code Groovy** - Essential for Groovy
+   - Groovy language support
+   - Extension ID: marlon407.code-groovy
+
+### Highly Recommended
+
+4. **Test Runner for Java** - Included in Java pack
+   - Run and debug Spock tests
+   - Extension ID: vscjava.vscode-java-test
+
+5. **Gradle for Java**
+   - Gradle build tool support
+   - Extension ID: vscjava.vscode-gradle
+
+6. **Maven for Java**
+   - Maven build tool support (if using Maven)
+   - Extension ID: vscjava.vscode-maven
+
+7. **Groovy Lint, Format and Fix**
+   - Linting for Groovy code
+   - Extension ID: NicolasVuillamy.vscode-groovy-lint
+
+### Optional but Useful
+
+8. **SonarLint**
+   - Code quality analysis
+   - Extension ID: SonarSource.sonarlint-vscode
+
+9. **Better Comments**
+   - Enhanced comment highlighting
+   - Extension ID: aaron-bond.better-comments
+
+10. **Error Lens**
+    - Inline error messages
+    - Extension ID: usernamehw.errorlens
+
+## Prerequisites
+
+### Install Java Development Kit (JDK)
+
+Spock requires Java 8 or higher.
+
+#### macOS
+```bash
+# Using Homebrew
+brew install openjdk@17
+
+# Or using SDKMAN
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java 17.0.9-tem
+
+# Verify
+java -version
+```
+
+#### Linux
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install openjdk-17-jdk
+
+# Or using SDKMAN
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java 17.0.9-tem
+
+# Verify
+java -version
+```
+
+#### Windows
+```powershell
+# Using Chocolatey
+choco install openjdk17
+
+# Or download from https://adoptium.net/
+
+# Verify
+java -version
+```
+
+### Install Groovy (Optional)
+
+While Groovy is included in Spock dependencies, you might want it installed separately:
+
+```bash
+# macOS
+brew install groovy
+
+# Linux (SDKMAN)
+sdk install groovy
+
+# Windows
+choco install groovy
+
+# Verify
+groovy -version
+```
+
+### Install Build Tool
+
+#### Gradle (Recommended)
+```bash
+# macOS
+brew install gradle
+
+# Linux (SDKMAN)
+sdk install gradle
+
+# Windows
+choco install gradle
+
+# Verify
+gradle -version
+```
+
+#### Maven
+```bash
+# macOS
+brew install maven
+
+# Linux
+sudo apt install maven
+
+# Windows
+choco install maven
+
+# Verify
+mvn -version
+```
+
+## Installation
+
+### Option 1: Using Gradle (Recommended)
+
+#### Create New Gradle Project with Spock
+
+```bash
+# Create project directory
+mkdir my-spock-project
+cd my-spock-project
+
+# Initialize Gradle project
+gradle init --type groovy-library
+
+# Or manually create build.gradle
+```
+
+#### Gradle Configuration (build.gradle)
+
+**For Spock 2.x (Latest - requires Java 8+, Groovy 3.0+)**
+
+```groovy
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spock Framework
+    testImplementation platform('org.spockframework:spock-bom:2.3-groovy-3.0')
+    testImplementation 'org.spockframework:spock-core'
+    
+    // Optional Spock modules
+    testImplementation 'org.spockframework:spock-spring'  // Spring integration
+    testImplementation 'org.spockframework:spock-junit4'  // JUnit 4 compatibility
+    
+    // Groovy
+    implementation 'org.codehaus.groovy:groovy-all:3.0.19'
+    
+    // Optional: Mocking capabilities
+    testImplementation 'net.bytebuddy:byte-buddy:1.14.9'
+    testImplementation 'org.objenesis:objenesis:3.3'
+    
+    // Optional: Parameterized tests
+    testImplementation 'com.athaydes:spock-reports:2.5.1-groovy-3.0'
+}
+
+// Configure test task
+test {
+    useJUnitPlatform()  // For Spock 2.x
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = true
+    }
+}
+
+// Java version
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+```
+
+**For Spock 1.x (Legacy - Groovy 2.x)**
+
+```groovy
+plugins {
+    id 'groovy'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
+    testImplementation 'org.codehaus.groovy:groovy-all:2.5.15'
+}
+
+test {
+    useJUnit()
+}
+```
+
+### Option 2: Using Maven
+
+#### Maven Configuration (pom.xml)
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>my-spock-project</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spock.version>2.3-groovy-3.0</spock.version>
+        <groovy.version>3.0.19</groovy.version>
+    </properties>
+
+    <dependencies>
+        <!-- Spock Framework -->
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+            <version>${spock.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Groovy -->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>${groovy.version}</version>
+            <type>pom</type>
+        </dependency>
+
+        <!-- Optional: Spock Spring -->
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-spring</artifactId>
+            <version>${spock.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testing utilities -->
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.9</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+            <version>3.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Groovy compiler -->
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>3.0.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compileTests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Surefire for running tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Spec.java</include>
+                        <include>**/*Spec.groovy</include>
+                    </includes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+## How to Run Spock Tests
+
+### Using Gradle
+
+```bash
+# Run all tests
+gradle test
+
+# Run specific test class
+gradle test --tests "com.example.MySpec"
+
+# Run specific test method
+gradle test --tests "com.example.MySpec.should do something"
+
+# Run tests continuously (on file changes)
+gradle test --continuous
+
+# Run tests with detailed output
+gradle test --info
+
+# Run tests and generate HTML report
+gradle test
+# Report available at: build/reports/tests/test/index.html
+
+# Clean and test
+gradle clean test
+
+# Run tests in parallel
+gradle test --parallel --max-workers=4
+```
+
+### Using Maven
+
+```bash
+# Run all tests
+mvn test
+
+# Run specific test class
+mvn test -Dtest=MySpec
+
+# Run specific test method
+mvn test -Dtest=MySpec#testMethod
+
+# Skip tests
+mvn install -DskipTests
+
+# Clean and test
+mvn clean test
+
+# Run with verbose output
+mvn test -X
+```
+
+### Using VSCode
+
+**Method 1: Test Explorer**
+1. Open Test Explorer (beaker icon in sidebar)
+2. Tests will be discovered automatically
+3. Click play button next to test or spec to run
+4. Click debug button to debug
+
+**Method 2: CodeLens (inline buttons)**
+- "Run Test" and "Debug Test" buttons appear above test methods
+- Click to run individual tests
+
+**Method 3: Command Palette**
+- Cmd/Ctrl + Shift + P
+- Type "Java: Run Tests"
+- Select test to run
+
+**Method 4: Terminal**
+```bash
+# Open terminal in VSCode (Ctrl+`)
+gradle test
+# or
+mvn test
+```
+
+### Using IntelliJ IDEA
+
+1. Right-click on test class or method
+2. Select "Run 'TestName'" or "Debug 'TestName'"
+3. Or use Ctrl+Shift+F10 (Windows/Linux) or Ctrl+Shift+R (macOS)
+
+### Using Command Line with Java
+
+```bash
+# Compile and run (if using Gradle)
+./gradlew test
+
+# Using Maven wrapper
+./mvnw test
+```
+
+## Project Structure
+
+### Gradle-based Spock Project
+
+```
+my-spock-project/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── example/
+│   │   │           ├── Calculator.java
+│   │   │           └── UserService.java
+│   │   └── groovy/
+│   │       └── com/
+│   │           └── example/
+│   │               └── GroovyClass.groovy
+│   └── test/
+│       ├── groovy/
+│       │   └── com/
+│       │       └── example/
+│       │           ├── CalculatorSpec.groovy
+│       │           ├── UserServiceSpec.groovy
+│       │           └── IntegrationSpec.groovy
+│       └── resources/
+│           └── test-data.json
+├── build/
+│   ├── classes/
+│   ├── reports/
+│   │   └── tests/
+│   │       └── test/
+│   │           └── index.html
+│   └── test-results/
+├── build.gradle
+├── settings.gradle
+├── gradlew
+├── gradlew.bat
+└── .gitignore
+```
+
+### Maven-based Spock Project
+
+```
+my-spock-project/
+├── src/
+│   ├── main/
+│   │   └── java/
+│   │       └── com/
+│   │           └── example/
+│   │               └── Calculator.java
+│   └── test/
+│       ├── groovy/
+│       │   └── com/
+│       │       └── example/
+│       │           └── CalculatorSpec.groovy
+│       └── resources/
+├── target/
+│   ├── surefire-reports/
+│   └── test-classes/
+├── pom.xml
+└── .gitignore
+```
+
+### Spring Boot with Spock
+
+```
+spring-spock-app/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── example/
+│   │   │           ├── Application.java
+│   │   │           ├── controller/
+│   │   │           ├── service/
+│   │   │           ├── repository/
+│   │   │           └── model/
+│   │   └── resources/
+│   │       ├── application.yml
+│   │       └── application-test.yml
+│   └── test/
+│       ├── groovy/
+│       │   └── com/
+│       │       └── example/
+│       │           ├── controller/
+│       │           │   └── UserControllerSpec.groovy
+│       │           ├── service/
+│       │           │   └── UserServiceSpec.groovy
+│       │           └── integration/
+│       │               └── UserIntegrationSpec.groovy
+│       └── resources/
+├── build.gradle
+└── settings.gradle
+```
+
+## Where is the Documentation
+
+### Official Documentation
+
+1. **Spock Framework Official Site** - https://spockframework.org/
+   - Main documentation hub
+   - Getting started guide
+
+2. **Spock Framework Documentation** - https://spockframework.org/spock/docs/2.3/
+   - Complete reference documentation
+   - All features and examples
+
+3. **Spock GitHub** - https://github.com/spockframework/spock
+   - Source code
+   - Issue tracking
+   - Example projects
+
+4. **Spock Javadoc** - https://javadoc.io/doc/org.spockframework/spock-core
+   - API documentation
+   - Class and method references
+
+### Learning Resources
+
+1. **Spock Primer** - In official docs
+   - Quick introduction
+   - Core concepts
+
+2. **Baeldung Spock Tutorials** - https://www.baeldung.com/groovy-spock
+   - Practical examples
+   - Best practices
+
+3. **Java Code Geeks - Spock** - https://www.javacodegeeks.com/
+   - Articles and tutorials
+   - Real-world examples
+
+4. **DZone Spock Articles** - https://dzone.com/
+   - Community articles
+   - Tips and tricks
+
+### Books
+
+1. **Java Testing with Spock** - By Konstantinos Kapelonis
+   - Comprehensive guide
+   - Manning Publications
+
+2. **Spock: Up and Running** - By Rob Fletcher
+   - Practical approach
+   - Quick start
+
+### Related Documentation
+
+1. **Groovy Documentation** - https://groovy-lang.org/documentation.html
+   - Groovy language reference
+   - Since Spock uses Groovy
+
+2. **JUnit 5 Platform** - https://junit.org/junit5/
+   - Test platform integration
+   - For Spock 2.x
+
+3. **Spring Testing** - https://docs.spring.io/spring-framework/reference/testing.html
+   - Spring integration with Spock
+   - Using @SpringBootTest
+
+### Community and Support
+
+1. **Stack Overflow** - Tag: `spock`, `groovy`, `spock-framework`
+   - Q&A for specific problems
+   - Active community
+
+2. **Spock User Forum** - https://github.com/spockframework/spock/discussions
+   - GitHub Discussions
+   - Community help
+
+3. **Gitter Chat** - Spock Framework channel
+   - Real-time help
+   - Community discussions
+
+4. **Reddit** - r/java, r/groovy
+   - General discussions
+   - Tips and examples
+
+### YouTube Tutorials
+
+1. Search for "Spock Framework Tutorial"
+2. Conference talks: "Testing with Spock"
+3. Spring Boot with Spock examples
+4. Data-driven testing with Spock
+
+### Sample Projects and Examples
+
+1. **Spock Example Project** - https://github.com/spockframework/spock-example
+   - Official examples
+   - Best practices
+
+2. **Spock Workshop** - Various GitHub repositories
+   - Hands-on examples
+   - Learning exercises
+
+## Spock Versions
+
+### Version History
+
+- **Spock 0.x** (2008-2012) - Early versions
+- **Spock 1.x** (2015-2020) - Groovy 2.x, JUnit 4
+- **Spock 2.x** (2020-present) - Groovy 3.x+, JUnit Platform, Java 8+
+
+### Version Compatibility
+
+**Spock 2.3 (Latest)**
+- Java: 8+
+- Groovy: 3.0, 4.0
+- JUnit Platform (JUnit 5)
+
+**Spock 2.0-2.2**
+- Java: 8+
+- Groovy: 3.0
+- JUnit Platform
+
+**Spock 1.3 (Legacy)**
+- Java: 7+
+- Groovy: 2.0-2.5
+- JUnit 4
+
+### Choosing Version
+
+```groovy
+// Spock 2.3 with Groovy 3.0 (Recommended)
+testImplementation 'org.spockframework:spock-core:2.3-groovy-3.0'
+
+// Spock 2.3 with Groovy 4.0
+testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
+
+// Spock 1.3 with Groovy 2.5 (Legacy)
+testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
+```
+
+## Spock Basics
+
+### Specification Structure
+
+```groovy
+import spock.lang.Specification
+
+class MySpec extends Specification {
+    
+    // Setup runs before each test method
+    def setup() {
+        // Setup code
+    }
+    
+    // Cleanup runs after each test method
+    def cleanup() {
+        // Cleanup code
+    }
+    
+    // setupSpec runs once before all tests
+    def setupSpec() {
+        // One-time setup
+    }
+    
+    // cleanupSpec runs once after all tests
+    def cleanupSpec() {
+        // One-time cleanup
+    }
+    
+    // Test method (feature method)
+    def "should do something"() {
+        given: "some context"
+        def calculator = new Calculator()
+        
+        when: "an action is performed"
+        def result = calculator.add(2, 3)
+        
+        then: "expect some outcome"
+        result == 5
+    }
+}
+```
+
+### Spock Blocks
+
+```groovy
+def "test blocks"() {
+    given: "setup phase - prepare test data"
+    // Also can use: setup:
+    def list = []
+    
+    when: "stimulus - action under test"
+    list << "item"
+    
+    then: "response - assert expectations"
+    list.size() == 1
+    list[0] == "item"
+    
+    and: "additional assertions"
+    !list.isEmpty()
+    
+    expect: "combined when + then (for simple cases)"
+    Math.max(1, 2) == 2
+    
+    where: "data-driven testing"
+    a | b | sum
+    1 | 2 | 3
+    2 | 3 | 5
+}
+```
+
+### Data-Driven Testing (Where Block)
+
+```groovy
+import spock.lang.Specification
+
+class DataDrivenSpec extends Specification {
+    
+    def "maximum of #a and #b is #max"() {
+        expect:
+        Math.max(a, b) == max
+        
+        where:
+        a | b | max
+        1 | 2 | 2
+        3 | 1 | 3
+        5 | 5 | 5
+    }
+    
+    def "test with multiple columns"() {
+        expect:
+        name.size() == length
+        
+        where:
+        name      | length
+        "Alice"   | 5
+        "Bob"     | 3
+        "Charlie" | 7
+    }
+    
+    def "test with data pipes"() {
+        expect:
+        name.toUpperCase() == upper
+        
+        where:
+        name << ["alice", "bob", "charlie"]
+        upper << ["ALICE", "BOB", "CHARLIE"]
+    }
+    
+    def "test with derived values"() {
+        expect:
+        sum == a + b
+        
+        where:
+        a | b
+        1 | 2
+        3 | 4
+        5 | 6
+        
+        sum = a + b  // Derived value
+    }
+}
+```
+
+### Mocking and Stubbing
+
+```groovy
+import spock.lang.Specification
+
+class MockingSpec extends Specification {
+    
+    def "test with mock"() {
+        given: "a mock object"
+        def subscriber = Mock(Subscriber)
+        def publisher = new Publisher()
+        publisher.addSubscriber(subscriber)
+        
+        when: "action is performed"
+        publisher.publish("event")
+        
+        then: "verify interaction"
+        1 * subscriber.receive("event")
+    }
+    
+    def "test with stub"() {
+        given: "a stub"
+        def service = Stub(UserService)
+        service.getUser(1) >> new User(id: 1, name: "Alice")
+        
+        when:
+        def user = service.getUser(1)
+        
+        then:
+        user.name == "Alice"
+    }
+    
+    def "test with spy"() {
+        given: "a spy (partial mock)"
+        def list = Spy(ArrayList)
+        
+        when:
+        list.add("item")
+        
+        then:
+        1 * list.add("item")
+        list.size() == 1
+    }
+    
+    def "complex interactions"() {
+        given:
+        def subscriber = Mock(Subscriber)
+        
+        when:
+        // ... perform actions
+        
+        then:
+        3 * subscriber.receive(_)              // Called 3 times with any arg
+        1 * subscriber.receive("important")    // Called once with "important"
+        (1..3) * subscriber.receive(_)         // Called 1 to 3 times
+        0 * subscriber.close()                 // Never called
+    }
+    
+    def "stubbing with multiple returns"() {
+        given:
+        def service = Stub(Service)
+        service.getValue() >>> ["first", "second", "third"]
+        
+        expect:
+        service.getValue() == "first"
+        service.getValue() == "second"
+        service.getValue() == "third"
+    }
+}
+```
+
+### Exception Testing
+
+```groovy
+def "test exception"() {
+    given:
+    def calculator = new Calculator()
+    
+    when:
+    calculator.divide(1, 0)
+    
+    then:
+    thrown(ArithmeticException)
+}
+
+def "test specific exception"() {
+    when:
+    methodThatThrows()
+    
+    then:
+    def exception = thrown(CustomException)
+    exception.message == "Expected message"
+}
+
+def "test no exception thrown"() {
+    when:
+    calculator.add(1, 2)
+    
+    then:
+    notThrown(Exception)
+}
+```
+
+### Annotations
+
+```groovy
+import spock.lang.*
+
+@Title("User Service Specification")
+@Narrative("Tests for user service operations")
+@Subject(UserService)
+class UserServiceSpec extends Specification {
+    
+    @Ignore("Not implemented yet")
+    def "future test"() {
+        // ...
+    }
+    
+    @IgnoreIf({ System.getProperty("os.name").contains("Windows") })
+    def "unix only test"() {
+        // ...
+    }
+    
+    @Requires({ javaVersion >= 11 })
+    def "requires Java 11+"() {
+        // ...
+    }
+    
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    def "should complete within 5 seconds"() {
+        // ...
+    }
+    
+    @Unroll
+    def "test #name"() {
+        expect:
+        name.length() == length
+        
+        where:
+        name    | length
+        "Alice" | 5
+        "Bob"   | 3
+    }
+    
+    @Issue("JIRA-123")
+    def "fix for issue 123"() {
+        // ...
+    }
+    
+    @Stepwise
+    static class StepwiseSpec extends Specification {
+        // Tests run in order, stop on first failure
+        def "step 1"() { }
+        def "step 2"() { }
+        def "step 3"() { }
+    }
+}
+```
+
+## Best Practices
+
+1. **Use descriptive test names**
+   ```groovy
+   def "should return empty list when no users exist"() { }
+   def "should throw IllegalArgumentException when name is null"() { }
+   ```
+
+2. **Follow Given-When-Then structure**
+   - given: Setup and context
+   - when: Action under test
+   - then: Assertions
+
+3. **Use data-driven testing for multiple scenarios**
+   ```groovy
+   where:
+   input | expected
+   1     | true
+   2     | false
+   ```
+
+4. **Prefer expect: for simple tests**
+   ```groovy
+   def "simple assertion"() {
+       expect:
+       Math.max(1, 2) == 2
+   }
+   ```
+
+5. **Use mocks and stubs appropriately**
+   - Mock: Verify interactions
+   - Stub: Provide canned responses
+   - Spy: Partial mocking
+
+6. **Test one thing per feature method**
+   - Keep tests focused
+   - Use multiple feature methods
+
+7. **Use setup() for common initialization**
+   - DRY principle
+   - Clean test methods
+
+8. **Use meaningful variable names**
+   ```groovy
+   def calculator = new Calculator()  // Good
+   def c = new Calculator()           // Bad
+   ```
+
+9. **Use and: labels for clarity**
+   ```groovy
+   then:
+   result.status == 200
+   
+   and: "response contains expected data"
+   result.data.size() == 5
+   ```
+
+10. **Write integration tests separately**
+    - Unit tests: Fast, isolated
+    - Integration tests: Slower, full context
+
+11. **Use @Unroll for readable data-driven tests**
+    - Each row becomes separate test
+    - Better test reporting
+
+12. **Don't over-mock**
+    - Only mock external dependencies
+    - Test real objects when possible
+
+13. **Use Spock reports for better output**
+    ```groovy
+    testImplementation 'com.athaydes:spock-reports:2.5.1-groovy-3.0'
+    ```
+
+14. **Organize tests by feature**
+    - Group related tests
+    - Use nested specifications
+
+15. **Keep tests maintainable**
+    - Refactor test code
+    - Extract helper methods
+
+## Common Patterns
+
+### Testing Service Layer
+
+```groovy
+class UserServiceSpec extends Specification {
+    
+    UserRepository repository = Mock()
+    EmailService emailService = Mock()
+    UserService service = new UserService(repository, emailService)
+    
+    def "should create user"() {
+        given:
+        def user = new User(name: "Alice", email: "alice@example.com")
+        
+        when:
+        service.createUser(user)
+        
+        then:
+        1 * repository.save(user)
+        1 * emailService.sendWelcomeEmail(user.email)
+    }
+    
+    def "should find user by id"() {
+        given:
+        def userId = 1L
+        def expectedUser = new User(id: userId, name: "Alice")
+        repository.findById(userId) >> Optional.of(expectedUser)
+        
+        when:
+        def result = service.getUserById(userId)
+        
+        then:
+        result.isPresent()
+        result.get().name == "Alice"
+    }
+}
+```
+
+### Testing REST Controllers (Spring)
+
+```groovy
+@WebMvcTest(UserController)
+class UserControllerSpec extends Specification {
+    
+    @Autowired
+    MockMvc mockMvc
+    
+    @MockBean
+    UserService userService
+    
+    def "should return user when exists"() {
+        given:
+        def user = new User(id: 1, name: "Alice")
+        userService.getUserById(1) >> user
+        
+        when:
+        def response = mockMvc.perform(get("/users/1"))
+        
+        then:
+        response.andExpect(status().isOk())
+        response.andExpect(jsonPath('$.name').value("Alice"))
+    }
+}
+```
+
+### Integration Testing (Spring Boot)
+
+```groovy
+@SpringBootTest
+@AutoConfigureMockMvc
+class UserIntegrationSpec extends Specification {
+    
+    @Autowired
+    MockMvc mockMvc
+    
+    @Autowired
+    UserRepository repository
+    
+    def cleanup() {
+        repository.deleteAll()
+    }
+    
+    def "should create and retrieve user"() {
+        given:
+        def userJson = '{"name":"Alice","email":"alice@example.com"}'
+        
+        when: "create user"
+        def createResponse = mockMvc.perform(
+            post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userJson)
+        )
+        
+        then: "user is created"
+        createResponse.andExpect(status().isCreated())
+        
+        when: "retrieve user"
+        def id = 1L
+        def getResponse = mockMvc.perform(get("/users/${id}"))
+        
+        then: "user is found"
+        getResponse.andExpect(status().isOk())
+        getResponse.andExpect(jsonPath('$.name').value("Alice"))
+    }
+}
+```
+
+### Testing with TestContainers
+
+```groovy
+@Testcontainers
+@SpringBootTest
+class DatabaseIntegrationSpec extends Specification {
+    
+    @Shared
+    @Container
+    PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15")
+        .withDatabaseName("testdb")
+        .withUsername("test")
+        .withPassword("test")
+    
+    @DynamicPropertySource
+    static void setProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl)
+        registry.add("spring.datasource.username", postgres::getUsername)
+        registry.add("spring.datasource.password", postgres::getPassword)
+    }
+    
+    @Autowired
+    UserRepository repository
+    
+    def "should persist and retrieve user"() {
+        given:
+        def user = new User(name: "Alice", email: "alice@example.com")
+        
+        when:
+        repository.save(user)
+        
+        then:
+        def found = repository.findByEmail("alice@example.com")
+        found.isPresent()
+        found.get().name == "Alice"
+    }
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Groovy class not found"**
+   ```groovy
+   // In build.gradle, ensure:
+   dependencies {
+       implementation 'org.codehaus.groovy:groovy-all:3.0.19'
+   }
+   ```
+
+2. **"No tests found"**
+   ```groovy
+   // Ensure test class extends Specification
+   class MySpec extends Specification { }
+   
+   // Check test configuration
+   test {
+       useJUnitPlatform()  // For Spock 2.x
+   }
+   ```
+
+3. **"Cannot resolve symbol 'Specification'"**
+   - Check Spock dependency is in `testImplementation`
+   - Reload/reimport Gradle project
+   - Check IDE recognizes test sources
+
+4. **Maven: Tests not running**
+   ```xml
+   <!-- Ensure gmavenplus-plugin is configured -->
+   <plugin>
+       <groupId>org.codehaus.gmavenplus</groupId>
+       <artifactId>gmavenplus-plugin</artifactId>
+   </plugin>
+   
+   <!-- And surefire includes Groovy specs -->
+   <plugin>
+       <artifactId>maven-surefire-plugin</artifactId>
+       <configuration>
+           <includes>
+               <include>**/*Spec.groovy</include>
+           </includes>
+       </configuration>
+   </plugin>
+   ```
+
+5. **"Old" interaction verification errors**
+   ```groovy
+   // Correct order: call method, then verify
+   when:
+   service.doSomething()
+   
+   then:
+   1 * mock.method()
+   ```
+
+6. **Spring Boot tests failing**
+   ```groovy
+   // Add spock-spring dependency
+   testImplementation 'org.spockframework:spock-spring:2.3-groovy-3.0'
+   ```
+
+7. **VSCode not recognizing Groovy files**
+   - Install "Code Groovy" extension
+   - Reload window
+   - Check file extension is .groovy
+
+8. **Mocking final classes**
+   ```groovy
+   // Add byte-buddy and objenesis dependencies
+   testImplementation 'net.bytebuddy:byte-buddy:1.14.9'
+   testImplementation 'org.objenesis:objenesis:3.3'
+   ```
+
+## Configuration Files
+
+### Sample build.gradle (Complete)
+
+```groovy
+plugins {
+    id 'groovy'
+    id 'java-library'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Implementation
+    implementation 'org.codehaus.groovy:groovy-all:3.0.19'
+    implementation 'com.google.guava:guava:32.1.3-jre'
+    
+    // Spock testing
+    testImplementation platform('org.spockframework:spock-bom:2.3-groovy-3.0')
+    testImplementation 'org.spockframework:spock-core'
+    testImplementation 'org.spockframework:spock-spring'
+    
+    // Mocking support
+    testImplementation 'net.bytebuddy:byte-buddy:1.14.9'
+    testImplementation 'org.objenesis:objenesis:3.3'
+    
+    // Spock reports
+    testImplementation('com.athaydes:spock-reports:2.5.1-groovy-3.0') {
+        transitive = false
+    }
+    testImplementation 'org.slf4j:slf4j-simple:2.0.9'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+test {
+    useJUnitPlatform()
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+        showStandardStreams = false
+        showCauses = true
+        showStackTraces = true
+    }
+    
+    // System properties for Spock reports
+    systemProperty 'com.athaydes.spockframework.report.outputDir', 'build/spock-reports'
+    systemProperty 'com.athaydes.spockframework.report.showCodeBlocks', 'true'
+}
+
+// Task to open test report
+task openTestReport(type: Exec) {
+    commandLine 'open', 'build/reports/tests/test/index.html'
+}
+
+test.finalizedBy openTestReport
+```
+
+### SpockConfig.groovy (Optional)
+
+Create in `src/test/resources/SpockConfig.groovy`:
+
+```groovy
+import spock.config.*
+
+runner {
+    // Run tests in parallel
+    parallel {
+        enabled true
+        defaultSpecificationExecutionMode 'CONCURRENT'
+        defaultExecutionMode 'CONCURRENT'
+    }
+    
+    // Unroll by default
+    unroll {
+        defaultPattern '#featureName[#iterationIndex]'
+    }
+}
+
+report {
+    enabled true
+    logFileDir 'build/spock-reports'
+}
+```
+
+## Quick Start Examples
+
+### Hello World Specification
+
+**Step 1: Create project structure**
+
+```bash
+# Create directory structure
+mkdir -p spock-hello/src/test/groovy/com/example
+cd spock-hello
+```
+
+**Step 2: Create build.gradle**
+
+```groovy
+// build.gradle
+plugins {
+    id 'groovy'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.spockframework:spock-bom:2.3-groovy-3.0')
+    testImplementation 'org.spockframework:spock-core'
+    testImplementation 'org.apache.groovy:groovy:3.0.19'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut"
+        showStandardStreams = true
+    }
+}
+```
+
+**Step 3: Create Spock specification**
+
+```groovy
+// src/test/groovy/com/example/HelloWorldSpec.groovy
+package com.example
+
+import spock.lang.Specification
+
+class HelloWorldSpec extends Specification {
+    
+    def "prints Hello world message"() {
+        given: "a greeting message"
+        def message = "Hello world!"
+        
+        when: "we print the message"
+        println(message)
+        
+        then: "the message should be defined"
+        message != null
+        message == "Hello world!"
+    }
+}
+```
+
+**Step 4: Run the test**
+
+```bash
+# Using Gradle
+gradle test
+
+# Expected output:
+# > Task :test
+# 
+# HelloWorldSpec
+# 
+# Hello world!
+# 
+#   ✓ prints Hello world message
+# 
+# BUILD SUCCESSFUL
+```
+
+**Key Points:**
+- ❌ No main() method required (it's a test framework)
+- ❌ No public class declarations needed (Groovy)
+- ✅ Extends spock.lang.Specification
+- ✅ Uses given-when-then structure
+- ✅ Implicit assertions (no assertEquals needed)
+- ✅ Method names can contain spaces
+- ✅ Runs on JVM (requires Java)
+
+### Spock vs JUnit
+
+**JUnit (Java):**
+```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class HelloWorldTest {
+    @Test
+    public void testHelloWorld() {
+        String message = "Hello world!";
+        System.out.println(message);
+        assertNotNull(message);
+        assertEquals("Hello world!", message);
+    }
+}
+```
+
+**Spock (Groovy):**
+```groovy
+import spock.lang.Specification
+
+class HelloWorldSpec extends Specification {
+    def "prints Hello world message"() {
+        given:
+        def message = "Hello world!"
+        
+        when:
+        println(message)
+        
+        then:
+        message != null
+        message == "Hello world!"
+    }
+}
+```
+
+**Differences:**
+- ✅ More readable with BDD structure
+- ✅ No annotation clutter (@Test not needed)
+- ✅ Descriptive test names with spaces
+- ✅ Implicit assertions
+- ✅ Groovy's concise syntax
+
+### Minimal Hello World (Simplest)
+
+```groovy
+import spock.lang.Specification
+
+class MinimalSpec extends Specification {
+    def "hello world"() {
+        expect:
+        println("Hello world!")
+        true
+    }
+}
+```
+
+**Run with:**
+```bash
+gradle test
+```
+
+### Hello World with Data-Driven Testing
+
+```groovy
+import spock.lang.Specification
+
+class HelloSpec extends Specification {
+    def "greets #name with Hello message"() {
+        given:
+        def greeting = "Hello $name!"
+        
+        when:
+        println greeting
+        
+        then:
+        greeting.contains(name)
+        
+        where:
+        name << ["world", "Spock", "Groovy"]
+    }
+}
+```
+
+**Output:**
+```
+Hello world!
+Hello Spock!
+Hello Groovy!
+
+  ✓ greets world with Hello message
+  ✓ greets Spock with Hello message
+  ✓ greets Groovy with Hello message
+```
+
+### Project Structure
+
+```
+spock-hello/
+├── build.gradle                    # Build configuration
+├── src/
+│   └── test/
+│       └── groovy/
+│           └── com/
+│               └── example/
+│                   └── HelloWorldSpec.groovy
+└── build/
+    ├── classes/                    # Compiled classes
+    └── reports/
+        └── tests/
+            └── test/
+                └── index.html      # Test report
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+gradle test
+
+# Run with detailed output
+gradle test --info
+
+# Run specific test
+gradle test --tests "*HelloWorld*"
+
+# Clean and test
+gradle clean test
+
+# Continuous testing (auto-run on changes)
+gradle test --continuous
+
+# View HTML report
+open build/reports/tests/test/index.html
+```
+
+### Basic Specification (Calculator Example)
+
+```groovy
+import spock.lang.Specification
+
+class CalculatorSpec extends Specification {
+    
+    def calculator = new Calculator()
+    
+    def "adding two numbers"() {
+        expect:
+        calculator.add(2, 3) == 5
+    }
+    
+    def "subtracting two numbers"() {
+        given:
+        def a = 5
+        def b = 3
+        
+        when:
+        def result = calculator.subtract(a, b)
+        
+        then:
+        result == 2
+    }
+}
+```
+
+### Data-Driven Test
+
+```groovy
+class MathSpec extends Specification {
+    
+    def "maximum of #a and #b should be #max"() {
+        expect:
+        Math.max(a, b) == max
+        
+        where:
+        a  | b  | max
+        1  | 2  | 2
+        5  | 3  | 5
+        10 | 10 | 10
+    }
+}
+```
+
+### Mocking Example
+
+```groovy
+class PublisherSpec extends Specification {
+    
+    def "should notify all subscribers"() {
+        given:
+        def subscriber1 = Mock(Subscriber)
+        def subscriber2 = Mock(Subscriber)
+        def publisher = new Publisher()
+        publisher.subscribers = [subscriber1, subscriber2]
+        
+        when:
+        publisher.publish("news")
+        
+        then:
+        1 * subscriber1.receive("news")
+        1 * subscriber2.receive("news")
+    }
+}
+```
+
+### Spring Boot Test
+
+```groovy
+@SpringBootTest
+class ApplicationSpec extends Specification {
+    
+    @Autowired
+    UserService userService
+    
+    def "context loads"() {
+        expect:
+        userService != null
+    }
+}
+```
+
+## Advanced Features
+
+### Custom Matchers
+
+```groovy
+import static spock.util.matcher.HamcrestMatchers.*
+
+def "test with custom matcher"() {
+    expect:
+    "Hello" hasLength(5)
+}
+```
+
+### Polling Conditions
+
+```groovy
+import spock.util.concurrent.PollingConditions
+
+def "should eventually complete"() {
+    given:
+    def conditions = new PollingConditions(timeout: 10, delay: 1)
+    def service = new AsyncService()
+    
+    when:
+    service.startAsync()
+    
+    then:
+    conditions.eventually {
+        service.isComplete()
+    }
+}
+```
+
+### File System Operations
+
+```groovy
+import spock.lang.TempDir
+
+class FileSpec extends Specification {
+    
+    @TempDir
+    Path tempDir
+    
+    def "test file operations"() {
+        given:
+        def file = tempDir.resolve("test.txt")
+        
+        when:
+        file.write("content")
+        
+        then:
+        file.text == "content"
+    }
+}
+```
+
+This comprehensive guide should help you get started with Spock Framework for testing Java and Groovy applications!
+

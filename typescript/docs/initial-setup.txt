@@ -1,0 +1,1997 @@
+# TypeScript Initial Setup Guide
+
+## What is TypeScript?
+
+TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale. Developed and maintained by Microsoft, TypeScript is a superset of JavaScript that adds optional static typing, classes, interfaces, and other features. TypeScript code transpiles to clean, readable JavaScript that runs anywhere JavaScript runs: in a browser, on Node.js, or in any JavaScript engine.
+
+### Key Features
+- **Static Type Checking**: Catch errors before runtime
+- **Enhanced IDE Support**: Better autocomplete and IntelliSense
+- **Modern JavaScript Features**: Use ES6+ features with broad compatibility
+- **Object-Oriented Features**: Classes, interfaces, generics
+- **Gradual Adoption**: Can be added incrementally to JavaScript projects
+- **Great Tooling**: Excellent integration with editors and build tools
+
+## Extensions in VSCode
+
+VSCode has excellent built-in TypeScript support, but these extensions enhance the experience:
+
+### Essential Extensions
+
+1. **ESLint**
+   - Linting for TypeScript
+   - Extension ID: dbaeumer.vscode-eslint
+
+2. **Prettier - Code formatter**
+   - Automatic code formatting
+   - Extension ID: esbenp.prettier-vscode
+
+### Highly Recommended
+
+3. **TypeScript Error Translator**
+   - Makes TypeScript errors more readable
+   - Extension ID: mattpocock.ts-error-translator
+
+4. **Pretty TypeScript Errors**
+   - Beautiful error messages
+   - Extension ID: yoavbls.pretty-ts-errors
+
+5. **Path Intellisense**
+   - Autocomplete file paths
+   - Extension ID: christian-kohler.path-intellisense
+
+6. **Import Cost**
+   - Display size of imported packages
+   - Extension ID: wix.vscode-import-cost
+
+7. **JavaScript and TypeScript Nightly**
+   - Latest TypeScript version
+   - Extension ID: ms-vscode.vscode-typescript-next
+
+8. **Total TypeScript**
+   - TypeScript hints and tips
+   - Extension ID: mattpocock.ts-error-translator
+
+### Framework-Specific
+
+9. **React Extension Pack** (for React + TypeScript)
+   - Extension ID: jawandarajbir.react-vscode-extension-pack
+
+10. **Angular Language Service** (for Angular)
+    - Extension ID: Angular.ng-template
+
+11. **Vue - Official** (for Vue.js)
+    - Extension ID: Vue.volar
+
+12. **Svelte for VS Code** (for Svelte)
+    - Extension ID: svelte.svelte-vscode
+
+### Testing and Debugging
+
+13. **Jest**
+    - Jest test runner integration
+    - Extension ID: Orta.vscode-jest
+
+14. **Vitest**
+    - Vitest test runner
+    - Extension ID: ZixuanChen.vitest-explorer
+
+15. **REST Client**
+    - Test APIs directly in VSCode
+    - Extension ID: humao.rest-client
+
+## Installation
+
+### Prerequisites: Node.js and npm
+
+TypeScript requires Node.js and npm. See JavaScript setup guide for detailed Node.js installation.
+
+**Quick Install:**
+```bash
+# macOS
+brew install node
+
+# Linux (using nvm)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+nvm install --lts
+
+# Windows (Chocolatey)
+choco install nodejs
+
+# Verify
+node -v
+npm -v
+```
+
+### Install TypeScript
+
+#### Global Installation (for CLI usage)
+
+```bash
+# Install TypeScript globally
+npm install -g typescript
+
+# Verify installation
+tsc --version
+
+# Check where TypeScript is installed
+which tsc  # Unix/macOS
+where tsc  # Windows
+```
+
+#### Project-Level Installation (Recommended)
+
+```bash
+# Create project directory
+mkdir my-ts-project
+cd my-ts-project
+
+# Initialize npm project
+npm init -y
+
+# Install TypeScript as dev dependency
+npm install --save-dev typescript
+
+# Install type definitions for Node.js
+npm install --save-dev @types/node
+
+# Verify
+npx tsc --version
+```
+
+### Install ts-node (Run TypeScript directly)
+
+```bash
+# Global
+npm install -g ts-node
+
+# Or project-level
+npm install --save-dev ts-node
+
+# Run TypeScript files directly
+ts-node script.ts
+```
+
+### Install Additional Tools
+
+```bash
+# TSX - Fast TypeScript execution
+npm install -g tsx
+
+# TypeScript ESLint
+npm install --save-dev @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint
+
+# Prettier
+npm install --save-dev prettier
+
+# ts-node-dev - Auto-restart on changes
+npm install --save-dev ts-node-dev
+
+# nodemon with ts-node
+npm install --save-dev nodemon
+
+# TypeScript formatter
+npm install --save-dev @typescript-eslint/eslint-plugin
+```
+
+## Initialize TypeScript Project
+
+### Method 1: Using tsc --init
+
+```bash
+# Create project
+mkdir my-project
+cd my-project
+
+# Initialize npm
+npm init -y
+
+# Install TypeScript
+npm install --save-dev typescript
+
+# Create tsconfig.json
+npx tsc --init
+
+# This creates tsconfig.json with comments
+```
+
+### Method 2: Manual Setup
+
+```bash
+# Create directories
+mkdir src
+mkdir dist
+
+# Create tsconfig.json manually
+touch tsconfig.json
+
+# Create index.ts
+touch src/index.ts
+```
+
+### Method 3: Using Project Templates
+
+```bash
+# React with TypeScript
+npx create-react-app my-app --template typescript
+
+# Next.js with TypeScript
+npx create-next-app@latest my-app --typescript
+
+# Vite with TypeScript
+npm create vite@latest my-app -- --template react-ts
+npm create vite@latest my-app -- --template vue-ts
+
+# Express with TypeScript
+npx express-generator-typescript my-app
+
+# NestJS (TypeScript by default)
+npm i -g @nestjs/cli
+nest new my-app
+```
+
+## How to Compile and Run TypeScript
+
+### Method 1: Using tsc (TypeScript Compiler)
+
+```bash
+# Compile single file
+tsc filename.ts
+
+# Output to specific file
+tsc filename.ts --outFile output.js
+
+# Compile with config file
+tsc
+
+# Watch mode (auto-recompile on changes)
+tsc --watch
+tsc -w
+
+# Compile specific files
+tsc file1.ts file2.ts
+
+# Check for errors without emitting files
+tsc --noEmit
+
+# Compile with source maps
+tsc --sourceMap
+```
+
+### Method 2: Using ts-node (Direct Execution)
+
+```bash
+# Run TypeScript file directly
+ts-node src/index.ts
+
+# With arguments
+ts-node src/index.ts arg1 arg2
+
+# REPL mode
+ts-node
+
+# With project reference
+ts-node -P tsconfig.json src/index.ts
+
+# With ES modules
+ts-node --esm src/index.ts
+```
+
+### Method 3: Using tsx (Fast Execution)
+
+```bash
+# Install tsx
+npm install -g tsx
+
+# Run TypeScript file
+tsx src/index.ts
+
+# Watch mode
+tsx watch src/index.ts
+```
+
+### Method 4: Using npm Scripts
+
+**package.json:**
+```json
+{
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  }
+}
+```
+
+**Run scripts:**
+```bash
+npm run build
+npm run start
+npm run dev
+npm run type-check
+```
+
+### Method 5: Using Nodemon with ts-node
+
+**nodemon.json:**
+```json
+{
+  "watch": ["src"],
+  "ext": "ts",
+  "exec": "ts-node src/index.ts"
+}
+```
+
+**Run:**
+```bash
+npx nodemon
+```
+
+### Method 6: Using VSCode
+
+**Method 6a: Built-in Run**
+- Open TypeScript file
+- Press F5 to debug
+- Or use Run button in editor
+
+**Method 6b: Configure Tasks**
+Create `.vscode/tasks.json`:
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "tsc: build",
+      "type": "typescript",
+      "tsconfig": "tsconfig.json",
+      "problemMatcher": ["$tsc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
+```
+
+**Method 6c: Debug Configuration**
+Create `.vscode/launch.json`:
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug TypeScript",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${workspaceFolder}/src/index.ts"],
+      "cwd": "${workspaceFolder}",
+      "protocol": "inspector"
+    }
+  ]
+}
+```
+
+## TypeScript Configuration (tsconfig.json)
+
+### Basic Configuration
+
+```json
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2020",                  // ECMAScript target version
+    "lib": ["ES2020"],                   // Library files to include
+    "module": "commonjs",                // Module system
+    "jsx": "react",                      // JSX support (if using React)
+    
+    /* Modules */
+    "moduleResolution": "node",          // Module resolution strategy
+    "baseUrl": "./",                     // Base directory
+    "paths": {                           // Path mapping
+      "@/*": ["src/*"]
+    },
+    "resolveJsonModule": true,           // Import .json files
+    
+    /* Emit */
+    "outDir": "./dist",                  // Output directory
+    "rootDir": "./src",                  // Root directory
+    "removeComments": true,              // Remove comments
+    "sourceMap": true,                   // Generate .map files
+    "declaration": true,                 // Generate .d.ts files
+    
+    /* Interop Constraints */
+    "esModuleInterop": true,             // Emit interop helpers
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    
+    /* Type Checking */
+    "strict": true,                      // Enable all strict checks
+    "noImplicitAny": true,              // Error on implicit 'any'
+    "strictNullChecks": true,           // Strict null checking
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    
+    /* Additional Checks */
+    "noUnusedLocals": true,             // Report unused locals
+    "noUnusedParameters": true,         // Report unused parameters
+    "noImplicitReturns": true,          // Report missing returns
+    "noFallthroughCasesInSwitch": true,
+    
+    /* Completeness */
+    "skipLibCheck": true                 // Skip type checking .d.ts files
+  },
+  "include": ["src/**/*"],               // Files to include
+  "exclude": ["node_modules", "dist"]    // Files to exclude
+}
+```
+
+### React Configuration
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+```
+
+### Node.js Configuration
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
+}
+```
+
+### Library Configuration
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "lib": ["ES2020"],
+    "types": []
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}
+```
+
+## Project Structure
+
+### Simple TypeScript Project
+
+```
+my-project/
+├── src/
+│   ├── index.ts
+│   ├── types.ts
+│   └── utils/
+│       └── helpers.ts
+├── dist/
+│   ├── index.js
+│   └── index.d.ts
+├── node_modules/
+├── .gitignore
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+### Node.js API Project
+
+```
+api-project/
+├── src/
+│   ├── index.ts
+│   ├── app.ts
+│   ├── server.ts
+│   ├── controllers/
+│   │   └── userController.ts
+│   ├── services/
+│   │   └── userService.ts
+│   ├── models/
+│   │   └── User.ts
+│   ├── routes/
+│   │   └── userRoutes.ts
+│   ├── middleware/
+│   │   └── auth.ts
+│   ├── types/
+│   │   └── index.ts
+│   ├── config/
+│   │   └── database.ts
+│   └── utils/
+│       └── logger.ts
+├── tests/
+│   ├── unit/
+│   └── integration/
+├── dist/
+├── node_modules/
+├── .env
+├── .gitignore
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+### React + TypeScript Project
+
+```
+react-app/
+├── public/
+│   └── index.html
+├── src/
+│   ├── index.tsx
+│   ├── App.tsx
+│   ├── components/
+│   │   ├── Header.tsx
+│   │   └── Footer.tsx
+│   ├── pages/
+│   │   ├── Home.tsx
+│   │   └── About.tsx
+│   ├── hooks/
+│   │   └── useAuth.ts
+│   ├── contexts/
+│   │   └── AuthContext.tsx
+│   ├── services/
+│   │   └── api.ts
+│   ├── types/
+│   │   └── index.ts
+│   ├── utils/
+│   │   └── helpers.ts
+│   └── styles/
+│       └── global.css
+├── node_modules/
+├── package.json
+├── tsconfig.json
+└── vite.config.ts (or webpack.config.js)
+```
+
+### Full-Stack TypeScript Monorepo
+
+```
+monorepo/
+├── packages/
+│   ├── client/
+│   │   ├── src/
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   ├── server/
+│   │   ├── src/
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── shared/
+│       ├── src/
+│       │   └── types/
+│       ├── package.json
+│       └── tsconfig.json
+├── node_modules/
+├── package.json
+├── tsconfig.json
+├── lerna.json (or pnpm-workspace.yaml)
+└── README.md
+```
+
+### Sample package.json
+
+```json
+{
+  "name": "my-typescript-project",
+  "version": "1.0.0",
+  "description": "A TypeScript project",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "watch": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["typescript", "node"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+```
+
+### Sample .gitignore
+
+```
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.js
+*.d.ts
+*.js.map
+
+# Keep important JS files
+!jest.config.js
+!*.config.js
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+```
+
+## Where is the Documentation
+
+### Official Documentation
+
+1. **TypeScript Handbook** - https://www.typescriptlang.org/docs/handbook/
+   - Official comprehensive guide
+   - Best place to learn TypeScript
+
+2. **TypeScript Playground** - https://www.typescriptlang.org/play
+   - Interactive TypeScript editor
+   - Try code in browser
+
+3. **TypeScript Release Notes** - https://www.typescriptlang.org/docs/handbook/release-notes/
+   - What's new in each version
+   - Breaking changes
+
+4. **TypeScript GitHub** - https://github.com/microsoft/TypeScript
+   - Source code
+   - Issue tracking
+   - RFCs
+
+5. **DefinitelyTyped** - https://github.com/DefinitelyTyped/DefinitelyTyped
+   - Type definitions for JavaScript libraries
+   - @types/* packages
+
+### Learning Resources
+
+1. **TypeScript Deep Dive** - https://basarat.gitbook.io/typescript/
+   - Free online book
+   - Comprehensive coverage
+
+2. **Execute Program** - https://www.executeprogram.com/
+   - Interactive TypeScript course
+   - Spaced repetition learning
+
+3. **Type Challenges** - https://github.com/type-challenges/type-challenges
+   - Practice TypeScript types
+   - Various difficulty levels
+
+4. **Total TypeScript** - https://www.totaltypescript.com/
+   - By Matt Pocock
+   - Free and paid courses
+
+5. **TypeScript Exercises** - https://typescript-exercises.github.io/
+   - Practice problems
+   - Progressive difficulty
+
+### Books
+
+1. **Programming TypeScript** - By Boris Cherny
+   - O'Reilly Media
+   - Comprehensive guide
+
+2. **Effective TypeScript** - By Dan Vanderkam
+   - 62 specific ways to improve TypeScript
+   - Best practices
+
+3. **TypeScript Quickly** - By Yakov Fain & Anton Moiseev
+   - Quick start guide
+   - Practical examples
+
+### Framework Documentation
+
+1. **React with TypeScript** - https://react-typescript-cheatsheet.netlify.app/
+   - React TypeScript patterns
+   - Cheatsheet
+
+2. **Vue.js with TypeScript** - https://vuejs.org/guide/typescript/overview.html
+   - Official Vue TypeScript guide
+
+3. **Angular** - https://angular.io/
+   - TypeScript by default
+   - Official docs
+
+4. **Next.js with TypeScript** - https://nextjs.org/docs/basic-features/typescript
+   - TypeScript in Next.js
+
+5. **NestJS** - https://nestjs.com/
+   - TypeScript Node.js framework
+   - Complete documentation
+
+6. **Express with TypeScript** - Various community guides
+   - Type definitions available
+   - @types/express
+
+### Community Resources
+
+1. **TypeScript Community** - https://www.typescriptlang.org/community
+   - Official community hub
+   - Links to forums and chats
+
+2. **Stack Overflow** - Tag: `typescript`
+   - Q&A for specific problems
+   - Large community
+
+3. **Reddit** - r/typescript
+   - Discussions and news
+   - Community help
+
+4. **Discord Communities**
+   - TypeScript Community Server
+   - Framework-specific servers
+
+5. **Dev.to** - https://dev.to/t/typescript
+   - Articles and tutorials
+   - Community posts
+
+### YouTube Channels
+
+1. **Matt Pocock** - Advanced TypeScript tips
+2. **Fireship** - Quick TypeScript tutorials
+3. **Jack Herrington** - TypeScript and React
+4. **Traversy Media** - TypeScript crash courses
+5. **Ben Awad** - TypeScript with modern frameworks
+6. **Web Dev Simplified** - TypeScript basics
+
+### Blogs and Newsletters
+
+1. **TypeScript Weekly** - https://typescript-weekly.com/
+2. **TypeScript TV** - Matt Pocock's newsletter
+3. **LogRocket Blog** - TypeScript articles
+4. **freeCodeCamp** - TypeScript tutorials
+
+### Cheat Sheets
+
+1. **TypeScript Cheat Sheet** - https://www.typescriptlang.org/cheatsheets
+2. **React TypeScript Cheatsheet** - https://react-typescript-cheatsheet.netlify.app/
+3. **TypeScript Type Challenges Solutions**
+
+## TypeScript Versions
+
+### Version History
+
+- **TypeScript 1.x** (2012-2015) - Initial releases
+- **TypeScript 2.x** (2016-2018) - Non-nullable types, async/await
+- **TypeScript 3.x** (2018-2020) - Project references, optional chaining
+- **TypeScript 4.x** (2020-2023) - Variadic tuple types, template literal types
+- **TypeScript 5.x** (2023-present) - Decorators, const type parameters
+
+### Recent Major Features
+
+**TypeScript 5.3 (2023)**
+- Import attributes
+- Resolution mode
+- Switch (true) narrowing
+
+**TypeScript 5.2 (2023)**
+- `using` declarations
+- Decorator metadata
+
+**TypeScript 5.0 (2023)**
+- Decorators (Stage 3)
+- const type parameters
+- All enums are union enums
+
+**TypeScript 4.9 (2022)**
+- satisfies operator
+- Unlisted property narrowing
+
+**TypeScript 4.7 (2022)**
+- ES modules in Node.js
+- Type-only imports
+
+**TypeScript 4.5 (2021)**
+- Awaited type
+- Template string types
+
+### Check TypeScript Version
+
+```bash
+# Global TypeScript
+tsc --version
+
+# Project TypeScript
+npx tsc --version
+
+# In package.json
+npm list typescript
+```
+
+## Common TypeScript Commands
+
+```bash
+# Compile TypeScript
+tsc
+tsc filename.ts
+tsc --watch
+
+# Run TypeScript
+ts-node filename.ts
+tsx filename.ts
+
+# Type check without emitting
+tsc --noEmit
+
+# Generate declaration files only
+tsc --declaration --emitDeclarationOnly
+
+# Compile with specific config
+tsc -p tsconfig.production.json
+
+# Show compiled output
+tsc --showOutput
+
+# List files to be compiled
+tsc --listFiles
+
+# Explain why a file is included
+tsc --explainFiles
+
+# Create tsconfig.json
+tsc --init
+
+# Show compiler options
+tsc --help
+
+# Show version
+tsc --version
+
+# Install type definitions
+npm install --save-dev @types/node
+npm install --save-dev @types/express
+npm install --save-dev @types/react
+
+# Search for type definitions
+npm search @types/package-name
+```
+
+## Best Practices
+
+1. **Enable strict mode**
+   ```json
+   {
+     "compilerOptions": {
+       "strict": true
+     }
+   }
+   ```
+
+2. **Use explicit types for function return values**
+   ```typescript
+   function add(a: number, b: number): number {
+     return a + b;
+   }
+   ```
+
+3. **Prefer interfaces for object shapes**
+   ```typescript
+   interface User {
+     id: number;
+     name: string;
+     email: string;
+   }
+   ```
+
+4. **Use type aliases for unions and complex types**
+   ```typescript
+   type Status = 'pending' | 'approved' | 'rejected';
+   type ID = string | number;
+   ```
+
+5. **Avoid using `any`**
+   ```typescript
+   // Bad
+   function process(data: any) { }
+   
+   // Good
+   function process(data: unknown) { }
+   // or
+   function process<T>(data: T) { }
+   ```
+
+6. **Use utility types**
+   ```typescript
+   type PartialUser = Partial<User>;
+   type ReadonlyUser = Readonly<User>;
+   type UserName = Pick<User, 'name'>;
+   type UserWithoutId = Omit<User, 'id'>;
+   ```
+
+7. **Leverage type inference**
+   ```typescript
+   // Type is inferred as string
+   const name = "Alice";
+   
+   // No need to specify return type if obvious
+   const double = (n: number) => n * 2;
+   ```
+
+8. **Use const assertions**
+   ```typescript
+   const config = {
+     endpoint: '/api',
+     timeout: 5000
+   } as const;
+   ```
+
+9. **Use discriminated unions for type safety**
+   ```typescript
+   type Success = { status: 'success'; data: string };
+   type Error = { status: 'error'; error: string };
+   type Result = Success | Error;
+   
+   function handle(result: Result) {
+     if (result.status === 'success') {
+       // TypeScript knows result.data exists
+       console.log(result.data);
+     }
+   }
+   ```
+
+10. **Use generics for reusable code**
+    ```typescript
+    function identity<T>(arg: T): T {
+      return arg;
+    }
+    ```
+
+11. **Prefer readonly for immutability**
+    ```typescript
+    interface Config {
+      readonly apiKey: string;
+      readonly endpoints: readonly string[];
+    }
+    ```
+
+12. **Use mapped types**
+    ```typescript
+    type Nullable<T> = {
+      [P in keyof T]: T[P] | null;
+    };
+    ```
+
+13. **Type guards for runtime checks**
+    ```typescript
+    function isString(value: unknown): value is string {
+      return typeof value === 'string';
+    }
+    ```
+
+14. **Use declaration files (.d.ts) for types only**
+
+15. **Follow naming conventions**
+    - Interfaces/Types: PascalCase
+    - Functions/Variables: camelCase
+    - Constants: UPPER_SNAKE_CASE or camelCase
+
+## TypeScript Fundamentals
+
+### Basic Types
+
+```typescript
+// Primitives
+let isDone: boolean = false;
+let count: number = 42;
+let name: string = "Alice";
+let u: undefined = undefined;
+let n: null = null;
+let sym: symbol = Symbol("key");
+let big: bigint = 100n;
+
+// Arrays
+let list: number[] = [1, 2, 3];
+let list2: Array<number> = [1, 2, 3];
+
+// Tuple
+let tuple: [string, number] = ["hello", 10];
+
+// Enum
+enum Color {
+  Red,
+  Green,
+  Blue
+}
+let c: Color = Color.Green;
+
+// Any (avoid if possible)
+let notSure: any = 4;
+
+// Unknown (safer than any)
+let value: unknown = 4;
+
+// Void
+function log(): void {
+  console.log("logging");
+}
+
+// Never
+function error(message: string): never {
+  throw new Error(message);
+}
+
+// Object
+let obj: object = { key: "value" };
+```
+
+### Interfaces and Types
+
+```typescript
+// Interface
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  age?: number;  // Optional property
+  readonly createdAt: Date;  // Readonly
+}
+
+// Type alias
+type Point = {
+  x: number;
+  y: number;
+};
+
+// Extending interfaces
+interface Admin extends User {
+  role: string;
+  permissions: string[];
+}
+
+// Intersection types
+type Employee = User & {
+  employeeId: string;
+  department: string;
+};
+
+// Union types
+type ID = string | number;
+type Status = 'active' | 'inactive' | 'pending';
+
+// Function types
+type MathOperation = (a: number, b: number) => number;
+
+// Index signatures
+interface StringMap {
+  [key: string]: string;
+}
+```
+
+### Functions
+
+```typescript
+// Function declaration
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+// Arrow function
+const multiply = (a: number, b: number): number => a * b;
+
+// Optional parameters
+function greet(name: string, greeting?: string): string {
+  return `${greeting || 'Hello'}, ${name}`;
+}
+
+// Default parameters
+function greet2(name: string, greeting: string = 'Hello'): string {
+  return `${greeting}, ${name}`;
+}
+
+// Rest parameters
+function sum(...numbers: number[]): number {
+  return numbers.reduce((a, b) => a + b, 0);
+}
+
+// Function overloads
+function format(value: string): string;
+function format(value: number): string;
+function format(value: string | number): string {
+  return String(value);
+}
+
+// Generic functions
+function identity<T>(arg: T): T {
+  return arg;
+}
+
+const result = identity<string>("hello");
+```
+
+### Classes
+
+```typescript
+class Person {
+  // Properties
+  private id: number;
+  protected name: string;
+  public email: string;
+  readonly createdAt: Date;
+  
+  // Constructor with parameter properties
+  constructor(
+    id: number,
+    name: string,
+    public age: number  // Shorthand
+  ) {
+    this.id = id;
+    this.name = name;
+    this.email = '';
+    this.createdAt = new Date();
+  }
+  
+  // Methods
+  greet(): string {
+    return `Hello, ${this.name}`;
+  }
+  
+  // Getter
+  get fullName(): string {
+    return this.name;
+  }
+  
+  // Setter
+  set fullName(name: string) {
+    this.name = name;
+  }
+  
+  // Static method
+  static create(name: string): Person {
+    return new Person(0, name, 0);
+  }
+}
+
+// Inheritance
+class Employee extends Person {
+  constructor(
+    id: number,
+    name: string,
+    age: number,
+    public department: string
+  ) {
+    super(id, name, age);
+  }
+  
+  // Override method
+  greet(): string {
+    return `${super.greet()} from ${this.department}`;
+  }
+}
+
+// Abstract class
+abstract class Animal {
+  abstract makeSound(): void;
+  
+  move(): void {
+    console.log("Moving...");
+  }
+}
+
+class Dog extends Animal {
+  makeSound(): void {
+    console.log("Woof!");
+  }
+}
+
+// Implementing interfaces
+interface Drawable {
+  draw(): void;
+}
+
+class Circle implements Drawable {
+  draw(): void {
+    console.log("Drawing circle");
+  }
+}
+```
+
+### Generics
+
+```typescript
+// Generic function
+function wrapInArray<T>(value: T): T[] {
+  return [value];
+}
+
+// Generic interface
+interface Box<T> {
+  value: T;
+}
+
+const stringBox: Box<string> = { value: "hello" };
+const numberBox: Box<number> = { value: 42 };
+
+// Generic class
+class Container<T> {
+  constructor(private value: T) {}
+  
+  getValue(): T {
+    return this.value;
+  }
+}
+
+// Multiple type parameters
+function pair<T, U>(first: T, second: U): [T, U] {
+  return [first, second];
+}
+
+// Generic constraints
+interface HasLength {
+  length: number;
+}
+
+function logLength<T extends HasLength>(arg: T): void {
+  console.log(arg.length);
+}
+
+// Default generic types
+interface Props<T = string> {
+  value: T;
+}
+```
+
+### Advanced Types
+
+```typescript
+// Conditional types
+type IsString<T> = T extends string ? true : false;
+
+// Mapped types
+type Readonly<T> = {
+  readonly [P in keyof T]: T[P];
+};
+
+type Nullable<T> = {
+  [P in keyof T]: T[P] | null;
+};
+
+// Template literal types
+type Greeting = `hello ${string}`;
+type HTTPMethod = 'GET' | 'POST';
+type Endpoint = `/api/${string}`;
+
+// Index access types
+type Person = { name: string; age: number };
+type Age = Person['age'];  // number
+
+// typeof operator
+const config = { api: '/api', timeout: 5000 };
+type Config = typeof config;
+
+// keyof operator
+type PersonKeys = keyof Person;  // 'name' | 'age'
+
+// ReturnType utility
+function createUser() {
+  return { id: 1, name: "Alice" };
+}
+type User = ReturnType<typeof createUser>;
+```
+
+## Utility Types
+
+```typescript
+// Partial - Make all properties optional
+type PartialUser = Partial<User>;
+
+// Required - Make all properties required
+type RequiredUser = Required<User>;
+
+// Readonly - Make all properties readonly
+type ReadonlyUser = Readonly<User>;
+
+// Pick - Select specific properties
+type UserName = Pick<User, 'name' | 'email'>;
+
+// Omit - Exclude specific properties
+type UserWithoutId = Omit<User, 'id'>;
+
+// Record - Create object type with specific keys
+type Roles = Record<string, string[]>;
+
+// Exclude - Exclude types from union
+type T1 = Exclude<'a' | 'b' | 'c', 'a'>;  // 'b' | 'c'
+
+// Extract - Extract types from union
+type T2 = Extract<'a' | 'b' | 'c', 'a' | 'f'>;  // 'a'
+
+// NonNullable - Exclude null and undefined
+type T3 = NonNullable<string | number | undefined>;  // string | number
+
+// Parameters - Get function parameter types
+type P = Parameters<typeof add>;  // [number, number]
+
+// ReturnType - Get function return type
+type R = ReturnType<typeof add>;  // number
+
+// Awaited - Get resolved type of Promise
+type AsyncReturn = Awaited<Promise<string>>;  // string
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Cannot find module" errors**
+   ```bash
+   # Install type definitions
+   npm install --save-dev @types/node
+   npm install --save-dev @types/package-name
+   
+   # Or add to tsconfig.json
+   {
+     "compilerOptions": {
+       "moduleResolution": "node",
+       "esModuleInterop": true
+     }
+   }
+   ```
+
+2. **"Property does not exist on type"**
+   ```typescript
+   // Use type assertion
+   const value = (obj as MyType).property;
+   
+   // Or type guard
+   if ('property' in obj) {
+     console.log(obj.property);
+   }
+   ```
+
+3. **"Type 'X' is not assignable to type 'Y'"**
+   ```typescript
+   // Check type compatibility
+   // Use type assertion if you're sure
+   const value = unknownValue as KnownType;
+   
+   // Or type guard
+   if (isKnownType(unknownValue)) {
+     // Now TypeScript knows the type
+   }
+   ```
+
+4. **"Cannot redeclare block-scoped variable"**
+   ```typescript
+   // Add export {} to make it a module
+   export {};
+   
+   // Or use different variable names
+   ```
+
+5. **"Module not found" with path aliases**
+   ```json
+   // In tsconfig.json
+   {
+     "compilerOptions": {
+       "baseUrl": ".",
+       "paths": {
+         "@/*": ["src/*"]
+       }
+     }
+   }
+   ```
+
+6. **VSCode not picking up types**
+   - Reload window: Cmd/Ctrl + Shift + P → "Reload Window"
+   - Check TypeScript version: Click TypeScript version in status bar
+   - Install @types packages
+   - Check tsconfig.json is valid
+
+7. **Slow TypeScript compilation**
+   ```json
+   {
+     "compilerOptions": {
+       "incremental": true,
+       "skipLibCheck": true
+     }
+   }
+   ```
+
+8. **Import errors with JSON files**
+   ```json
+   {
+     "compilerOptions": {
+       "resolveJsonModule": true,
+       "esModuleInterop": true
+     }
+   }
+   ```
+
+## Configuration Files
+
+### ESLint Configuration (.eslintrc.json)
+
+```json
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/explicit-function-return-type": "warn"
+  }
+}
+```
+
+### Prettier Configuration (.prettierrc)
+
+```json
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 80,
+  "arrowParens": "always"
+}
+```
+
+### Jest Configuration (jest.config.js)
+
+```javascript
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+  transform: {
+    '^.+\\.ts$': 'ts-jest',
+  },
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.d.ts',
+    '!src/**/*.test.ts',
+  ],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+};
+```
+
+## Quick Start Examples
+
+### Hello World
+
+```typescript
+// hello.ts
+const greeting: string = "Hello, TypeScript!";
+console.log(greeting);
+```
+
+```bash
+tsc hello.ts
+node hello.js
+# or
+ts-node hello.ts
+```
+
+### Simple Function
+
+```typescript
+// math.ts
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+function greet(name: string): string {
+  return `Hello, ${name}!`;
+}
+
+console.log(add(5, 3));
+console.log(greet("World"));
+
+export { add, greet };
+```
+
+### Class Example
+
+```typescript
+// user.ts
+interface IUser {
+  id: number;
+  name: string;
+  email: string;
+}
+
+class User implements IUser {
+  constructor(
+    public id: number,
+    public name: string,
+    public email: string
+  ) {}
+  
+  getInfo(): string {
+    return `${this.name} (${this.email})`;
+  }
+}
+
+const user = new User(1, "Alice", "alice@example.com");
+console.log(user.getInfo());
+```
+
+### Express API
+
+```typescript
+// server.ts
+import express, { Request, Response } from 'express';
+
+const app = express();
+const PORT = 3000;
+
+app.use(express.json());
+
+interface User {
+  id: number;
+  name: string;
+}
+
+const users: User[] = [];
+
+app.get('/users', (req: Request, res: Response) => {
+  res.json(users);
+});
+
+app.post('/users', (req: Request, res: Response) => {
+  const user: User = req.body;
+  users.push(user);
+  res.status(201).json(user);
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+```
+
+```bash
+npm install express
+npm install --save-dev @types/express
+ts-node server.ts
+```
+
+### React Component
+
+```typescript
+// Button.tsx
+import React from 'react';
+
+interface ButtonProps {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  variant?: 'primary' | 'secondary';
+}
+
+const Button: React.FC<ButtonProps> = ({
+  label,
+  onClick,
+  disabled = false,
+  variant = 'primary'
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`btn btn-${variant}`}
+    >
+      {label}
+    </button>
+  );
+};
+
+export default Button;
+```
+
+### Async/Await with Types
+
+```typescript
+// api.ts
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+}
+
+async function fetchPost(id: number): Promise<Post> {
+  const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch post');
+  }
+  
+  const post: Post = await response.json();
+  return post;
+}
+
+// Usage
+fetchPost(1)
+  .then(post => console.log(post.title))
+  .catch(error => console.error(error));
+```
+
+This comprehensive guide should help you get started with TypeScript for any type of project!
+
+## Practical Hello World Example (Tested)
+
+Based on actual execution in the lessons directory:
+
+### Step 1: Create TypeScript File
+
+**File: 01-hello-world.ts**
+```typescript
+/**
+ * 01-hello-world.ts
+ * A simple TypeScript program to print "Hello world!"
+ */
+
+// Basic console output
+console.log("Hello world!");
+
+// With type annotations
+const message: string = "Hello world!";
+// console.log(message);
+
+// With function and type annotations
+function greet(greeting: string): void {
+    console.log(greeting);
+}
+// greet("Hello world!");
+
+// Export to make it a module (avoids variable redeclaration errors)
+export {};
+```
+
+### Step 2: Initialize npm and Install TypeScript
+
+```bash
+# Navigate to your lessons directory
+cd /path/to/typescript/lessons
+
+# Initialize npm project
+npm init -y
+
+# Install TypeScript
+npm install --save-dev typescript
+
+# Verify installation
+npx tsc --version
+```
+
+**Expected output:**
+```
+Version 5.x.x
+```
+
+### Step 3: Compile TypeScript to JavaScript
+
+```bash
+# Compile (creates 01-hello-world.js)
+npx tsc 01-hello-world.ts
+```
+
+**What happens:**
+- TypeScript compiler (`tsc`) reads `.ts` file
+- Type checks the code
+- Removes type annotations
+- Transpiles to JavaScript
+- Creates `.js` file
+
+**Files created:**
+```bash
+$ ls -lh
+-rw-r--r--  4.0K  01-hello-world.ts    # Source (with types)
+-rw-r--r--  2.4K  01-hello-world.js    # Compiled (types removed)
+```
+
+### Step 4: Run the Compiled JavaScript
+
+```bash
+# Run with Node.js
+node 01-hello-world.js
+```
+
+**Expected output:**
+```
+Hello world!
+```
+
+### Step 5: One-Line Compile and Run
+
+```bash
+# Compile and run in one command
+npx tsc 01-hello-world.ts && node 01-hello-world.js
+```
+
+**Expected output:**
+```
+Hello world!
+```
+
+### Alternative: Run TypeScript Directly (No Compilation Step)
+
+#### Method 1: Using ts-node
+
+```bash
+# Install ts-node
+npm install --save-dev ts-node
+
+# Run TypeScript directly
+npx ts-node 01-hello-world.ts
+```
+
+#### Method 2: Using tsx (Faster)
+
+```bash
+# Install tsx
+npm install --save-dev tsx
+
+# Run TypeScript directly
+npx tsx 01-hello-world.ts
+```
+
+### Understanding the Output Files
+
+**TypeScript (.ts) - Source:**
+```typescript
+const message: string = "Hello world!";
+console.log(message);
+export {};
+```
+
+**JavaScript (.js) - Compiled:**
+```javascript
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const message = "Hello world!";
+console.log(message);
+```
+
+**Key differences:**
+- Type annotations removed (`: string`)
+- CommonJS module code added
+- Strict mode enabled
+- Types validated at compile-time
+
+### Common Issues and Solutions
+
+#### Issue 1: "tsc: command not found"
+
+**Solution:**
+```bash
+# Use npx (uses local installation)
+npx tsc 01-hello-world.ts
+
+# Or install TypeScript globally
+npm install -g typescript
+tsc 01-hello-world.ts
+```
+
+#### Issue 2: "Cannot find name 'require'" or "Cannot find name 'module'"
+
+**Solution:**
+```bash
+# Install Node.js type definitions
+npm install --save-dev @types/node
+```
+
+**Or remove the problematic code:**
+```typescript
+// Comment out:
+// if (require.main === module) { ... }
+```
+
+#### Issue 3: "Cannot redeclare block-scoped variable"
+
+**Solution:**
+Add `export {}` at the end of the file to make it a module:
+```typescript
+console.log("Hello world!");
+export {};  // Makes this a module
+```
+
+#### Issue 4: No output after compilation
+
+**Problem:** Forgot to run the compiled JavaScript.
+
+**Solution:**
+```bash
+# After tsc, you must run the JS file
+tsc 01-hello-world.ts   # Creates .js file
+node 01-hello-world.js  # Runs the .js file
+```
+
+### Workflow Comparison
+
+#### JavaScript Workflow (Interpreted)
+```
+Write JS → Run with node → Execution
+(No compilation)
+```
+
+#### TypeScript Workflow (Compiled)
+```
+Write TS → Compile with tsc → Run JS with node → Execution
+         (Type checking)
+```
+
+#### TypeScript with ts-node/tsx (Direct Execution)
+```
+Write TS → Run with ts-node/tsx → Execution
+         (Compiles in memory)
+```
+
+### File Size Comparison (Actual)
+
+```bash
+$ ls -lh
+-rw-r--r--  4.0K  01-hello-world.ts    # TypeScript source
+-rw-r--r--  2.4K  01-hello-world.js    # Compiled JavaScript
+```
+
+**TypeScript is larger because:**
+- Type annotations (removed during compilation)
+- Documentation comments
+- Explicit type declarations
+
+**JavaScript is smaller because:**
+- No type information
+- Comments may be removed
+- Only executable code
+
+### Key Takeaways
+
+✅ **TypeScript must be compiled** before execution (unless using ts-node/tsx)
+✅ **Two files created**: `.ts` (source) and `.js` (output)
+✅ **Type checking happens at compile-time**, not runtime
+✅ **Node.js runs the JavaScript**, not TypeScript
+✅ **TypeScript = JavaScript + Types**
+✅ **All JavaScript is valid TypeScript** (but not vice versa)
+✅ **Use `npx tsc`** for local TypeScript installation
+✅ **Add `export {}`** to avoid variable redeclaration errors
+
+### Next Steps After Hello World
+
+1. **Learn Type Annotations**
+   ```typescript
+   let name: string = "Alice";
+   let age: number = 30;
+   let isActive: boolean = true;
+   ```
+
+2. **Create Functions with Types**
+   ```typescript
+   function add(a: number, b: number): number {
+       return a + b;
+   }
+   ```
+
+3. **Use Interfaces**
+   ```typescript
+   interface User {
+       name: string;
+       age: number;
+   }
+   
+   const user: User = { name: "Alice", age: 30 };
+   ```
+
+4. **Setup tsconfig.json**
+   ```bash
+   npx tsc --init
+   ```
+
+5. **Explore npm Scripts**
+   Add to package.json:
+   ```json
+   {
+     "scripts": {
+       "build": "tsc",
+       "start": "node dist/index.js",
+       "dev": "ts-node src/index.ts"
+     }
+   }
+   ```
+
+### Resources for Beginners
+
+- **TypeScript Handbook**: https://www.typescriptlang.org/docs/handbook/
+- **TypeScript Playground**: https://www.typescriptlang.org/play (Try code in browser)
+- **Lessons Directory**: See `../lessons/README.md` for detailed examples
+
+This practical guide is based on actual execution and testing in the TypeScript lessons environment!
+

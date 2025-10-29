@@ -1,0 +1,302 @@
+# Cucumber Initial Setup Guide
+
+## What is Cucumber?
+
+Cucumber is a Behavior-Driven Development (BDD) tool that allows you to write tests in plain English (Gherkin syntax) that are executable. It bridges the gap between business stakeholders and technical teams.
+
+## Extensions in VSCode
+
+1. **Cucumber (Gherkin) Full Support** - Essential
+   - Syntax highlighting for .feature files
+   - Auto-completion and formatting
+   - Extension ID: alexkrechik.cucumberautocomplete
+
+2. **Cucumber (Gherkin) Syntax Highlighting**
+   - Alternative syntax highlighter
+   - Extension ID: CucumberOpen.cucumber-official
+
+3. **Gherkin Indent** (Optional)
+   - Proper indentation for feature files
+   - Extension ID: aurel.gherkin-indent
+
+4. **Snippets for Cucumber**
+   - Quick snippets for step definitions
+   - Extension ID: stevejpurves.cucumber
+
+5. **Test Runner (based on your language)**
+   - For Java: Test Runner for Java (Microsoft)
+   - For JavaScript: Jest Runner or Mocha Test Explorer
+   - For Ruby: Ruby Test Explorer
+
+## Installation by Language
+
+### JavaScript/Node.js
+```bash
+# Using npm
+npm install --save-dev @cucumber/cucumber
+
+# Using yarn
+yarn add --dev @cucumber/cucumber
+
+# For Cucumber with Playwright
+npm install --save-dev @cucumber/cucumber @playwright/test
+```
+
+### Java (with Maven)
+Add to `pom.xml`:
+```xml
+<dependency>
+    <groupId>io.cucumber</groupId>
+    <artifactId>cucumber-java</artifactId>
+    <version>7.14.0</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>io.cucumber</groupId>
+    <artifactId>cucumber-junit</artifactId>
+    <version>7.14.0</version>
+    <scope>test</scope>
+</dependency>
+```
+
+### Java (with Gradle)
+Add to `build.gradle`:
+```groovy
+dependencies {
+    testImplementation 'io.cucumber:cucumber-java:7.14.0'
+    testImplementation 'io.cucumber:cucumber-junit:7.14.0'
+}
+```
+
+### Ruby
+```bash
+gem install cucumber
+
+# Or add to Gemfile
+# gem 'cucumber'
+# Then run: bundle install
+```
+
+### Python
+```bash
+pip install behave  # Python's BDD framework (Cucumber-like)
+# or
+pip install cucumber  # Python port of Cucumber
+```
+
+## Project Structure
+
+### JavaScript Example
+```
+project/
+├── features/
+│   ├── step_definitions/
+│   │   └── steps.js
+│   ├── support/
+│   │   └── world.js
+│   └── example.feature
+├── cucumber.js (configuration)
+└── package.json
+```
+
+### Java Example
+```
+project/
+├── src/
+│   └── test/
+│       ├── java/
+│       │   └── stepdefinitions/
+│       │       └── StepDefinitions.java
+│       └── resources/
+│           └── features/
+│               └── example.feature
+└── pom.xml or build.gradle
+```
+
+## How to Run Cucumber Tests
+
+### JavaScript/Node.js
+```bash
+# Run all features
+npx cucumber-js
+
+# Run specific feature
+npx cucumber-js features/example.feature
+
+# Run with tags
+npx cucumber-js --tags "@smoke"
+
+# Generate HTML report
+npx cucumber-js --format html:cucumber-report.html
+```
+
+### Java with Maven
+```bash
+# Run all tests
+mvn test
+
+# Run specific feature
+mvn test -Dcucumber.features="src/test/resources/features/example.feature"
+
+# Run with tags
+mvn test -Dcucumber.filter.tags="@smoke"
+```
+
+### Java with Gradle
+```bash
+# Run all tests
+gradle test
+
+# Run with specific tags
+gradle test -Dcucumber.filter.tags="@smoke"
+```
+
+### Ruby
+```bash
+# Run all features
+cucumber
+
+# Run specific feature
+cucumber features/example.feature
+
+# Run with tags
+cucumber --tags @smoke
+
+# Generate HTML report
+cucumber --format html --out cucumber-report.html
+```
+
+## Gherkin Syntax Basics
+
+### Feature File Structure (.feature)
+```gherkin
+Feature: User Login
+  As a user
+  I want to log in to the application
+  So that I can access my account
+
+  Background:
+    Given the application is running
+
+  @smoke @regression
+  Scenario: Successful login with valid credentials
+    Given I am on the login page
+    When I enter username "testuser"
+    And I enter password "password123"
+    And I click the login button
+    Then I should see the dashboard
+    And I should see a welcome message
+
+  Scenario Outline: Login with multiple users
+    Given I am on the login page
+    When I enter username "<username>"
+    And I enter password "<password>"
+    Then I should see "<result>"
+
+    Examples:
+      | username  | password    | result           |
+      | user1     | pass1       | dashboard        |
+      | user2     | pass2       | dashboard        |
+      | invalid   | wrong       | error message    |
+```
+
+### Gherkin Keywords
+- **Feature**: High-level description of a software feature
+- **Background**: Steps to run before each scenario
+- **Scenario**: Concrete example of business rule
+- **Scenario Outline**: Template scenario with multiple examples
+- **Given**: Set up initial context
+- **When**: Perform an action
+- **Then**: Assert expected outcome
+- **And/But**: Continue previous step type
+- **Examples**: Data table for Scenario Outline
+- **@tags**: Organize and filter scenarios
+
+## Configuration Files
+
+### JavaScript (cucumber.js)
+```javascript
+module.exports = {
+  default: {
+    require: ['features/step_definitions/**/*.js'],
+    format: ['progress', 'html:cucumber-report.html'],
+    publishQuiet: true
+  }
+};
+```
+
+### Java (cucumber.properties)
+```properties
+cucumber.publish.quiet=true
+cucumber.plugin=pretty, html:target/cucumber-reports.html
+cucumber.glue=stepdefinitions
+cucumber.features=src/test/resources/features
+```
+
+## Where is the Documentation
+
+### Official Documentation
+1. **Cucumber Official Docs** - https://cucumber.io/docs
+   - Main documentation hub for all languages
+   - Best practices and guides
+
+2. **Cucumber GitHub** - https://github.com/cucumber
+   - Source code and examples
+   - Language-specific implementations
+
+3. **BDD and Cucumber** - https://cucumber.io/docs/bdd/
+   - Behavior-Driven Development concepts
+   - How to write effective scenarios
+
+### Language-Specific Docs
+1. **JavaScript** - https://github.com/cucumber/cucumber-js
+   - Node.js specific documentation
+   - API reference
+
+2. **Java** - https://github.com/cucumber/cucumber-jvm
+   - JVM implementation
+   - Integration guides
+
+3. **Ruby** - https://github.com/cucumber/cucumber-ruby
+   - Ruby-specific features
+   - Ruby API
+
+4. **Gherkin Reference** - https://cucumber.io/docs/gherkin/reference/
+   - Complete Gherkin syntax guide
+   - Keywords and best practices
+
+### Learning Resources
+1. **Cucumber School** - https://school.cucumber.io/
+   - Free courses and tutorials
+   - Best practices
+
+2. **Automation Panda** - https://automationpanda.com/bdd/
+   - Excellent BDD tutorials
+   - Real-world examples
+
+3. **The Cucumber Book**
+   - Book by Matt Wynne and Aslak Hellesøy
+   - Comprehensive guide to BDD with Cucumber
+
+4. **YouTube Channels**
+   - Cucumber official channel
+   - Various tutorial channels for language-specific implementations
+
+### Community and Support
+- **Cucumber Community** - https://cucumber.io/community
+- **Stack Overflow** - Tag: `cucumber`, `gherkin`, `bdd`
+- **Slack/Discord** - Cucumber community channels
+
+## Best Practices
+
+1. **Write from user perspective**: Focus on behavior, not implementation
+2. **Keep scenarios independent**: Each scenario should run standalone
+3. **Use descriptive names**: Make features and scenarios self-documenting
+4. **Avoid technical details**: Use business language in feature files
+5. **Reuse step definitions**: Don't duplicate step implementations
+6. **Use tags wisely**: Organize tests (@smoke, @regression, @wip)
+7. **Keep scenarios short**: Aim for 3-7 steps per scenario
+8. **Use Background sparingly**: Only for truly common setup steps
+9. **Data tables for complex data**: Use examples for multiple test cases
+10. **One feature per file**: Keep features focused and manageable
+

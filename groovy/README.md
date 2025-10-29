@@ -18,3 +18,7 @@ Spock test format (Groovy + BDD style: given / when / then)
 -- then: verifies outcomes (status code, JSON fields).
 
 -- and: adds extra assertions.
+
+Setup
+=====
+brew install groovy

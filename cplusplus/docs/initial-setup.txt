@@ -1,0 +1,96 @@
+# C++ Initial Setup Guide
+
+## Extensions in VSCode
+
+1. **C/C++ (Microsoft)** - Essential extension for C++ development
+   - IntelliSense, debugging, and code browsing
+   - Extension ID: ms-vscode.cpptools
+
+2. **C/C++ Extension Pack (Microsoft)** - Recommended
+   - Includes C/C++, CMake, and CMake Tools
+   - Extension ID: ms-vscode.cpptools-extension-pack
+
+3. **clangd** (Optional, alternative to C/C++)
+   - Fast code completion and diagnostics
+   - Extension ID: llvm-vs-code-extensions.vscode-clangd
+
+4. **Code Runner** (Optional)
+   - Quick run C++ files with a single click
+   - Extension ID: formulahendry.code-runner
+
+## How to Run a C++ Program
+
+### Method 1: Using g++ (GCC compiler)
+```bash
+# Compile the program
+g++ filename.cpp -o output_name
+
+# Run the compiled program
+./output_name
+
+# Example:
+g++ hello-world.cpp -o hello
+./hello
+```
+
+### Method 2: Using clang++
+```bash
+# Compile the program
+clang++ filename.cpp -o output_name
+
+# Run the compiled program
+./output_name
+```
+
+### Method 3: Compile and run in one line
+```bash
+g++ filename.cpp -o output && ./output
+```
+
+### Method 4: Using VSCode Tasks
+- Press `Cmd+Shift+B` (Mac) or `Ctrl+Shift+B` (Windows/Linux)
+- Configure tasks in `.vscode/tasks.json` for automated build
+
+### Common Compiler Flags
+- `-o <name>` : Specify output file name
+- `-std=c++17` : Use C++17 standard (or c++11, c++14, c++20, c++23)
+- `-Wall` : Enable all warnings
+- `-g` : Include debugging information
+- `-O2` : Optimize code (level 2)
+
+Example with flags:
+```bash
+g++ -std=c++17 -Wall -g filename.cpp -o output
+```
+
+## Where is the Documentation
+
+### Official Documentation
+1. **C++ Reference** - https://en.cppreference.com/
+   - Comprehensive C++ language and standard library reference
+   - Most commonly used by developers
+
+2. **ISO C++ Official Site** - https://isocpp.org/
+   - Official C++ standards and guidelines
+   - Latest news and updates about C++
+
+3. **C++ Standard Library** - https://cplusplus.com/reference/
+   - Detailed documentation for standard library
+   - Tutorials and examples
+
+### Learning Resources
+1. **LearnCpp.com** - https://www.learncpp.com/
+   - Free, comprehensive C++ tutorials
+
+2. **C++ Core Guidelines** - https://isocpp.github.io/CppCoreGuidelines/
+   - Best practices and coding guidelines
+
+3. **Compiler Documentation**
+   - GCC: https://gcc.gnu.org/onlinedocs/
+   - Clang: https://clang.llvm.org/docs/
+   - MSVC: https://docs.microsoft.com/en-us/cpp/
+
+### Quick Reference
+- **cppreference.com** - Quick lookup for syntax and functions
+- **cplusplus.com** - Alternative reference with examples
+- **Stack Overflow** - Community Q&A for specific problems

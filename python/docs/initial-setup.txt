@@ -1,0 +1,1834 @@
+# Python Initial Setup Guide
+
+## What is Python?
+
+Python is a high-level, interpreted, general-purpose programming language. Its design philosophy emphasizes code readability with the use of significant indentation. Python is dynamically typed and garbage-collected, supporting multiple programming paradigms including structured, object-oriented, and functional programming.
+
+## Extensions in VSCode
+
+### Essential Extensions
+
+1. **Python (Microsoft)** - Must have
+   - IntelliSense, debugging, linting, formatting
+   - Extension ID: ms-python.python
+
+2. **Pylance** - Included with Python extension
+   - Fast language server
+   - Type checking and IntelliSense
+   - Extension ID: ms-python.vscode-pylance
+
+### Highly Recommended
+
+3. **Python Indent**
+   - Correct Python indentation
+   - Extension ID: KevinRose.vsc-python-indent
+
+4. **autoDocstring**
+   - Generate Python docstrings automatically
+   - Extension ID: njpwerner.autodocstring
+
+5. **Python Test Explorer**
+   - Run and debug tests
+   - Extension ID: LittleFoxTeam.vscode-python-test-adapter
+
+6. **Jupyter** (for data science)
+   - Jupyter notebook support
+   - Extension ID: ms-toolsai.jupyter
+
+### Code Quality
+
+7. **Ruff**
+   - Fast Python linter
+   - Extension ID: charliermarsh.ruff
+
+8. **Black Formatter**
+   - Opinionated code formatter
+   - Extension ID: ms-python.black-formatter
+
+9. **isort**
+   - Sort imports automatically
+   - Extension ID: ms-python.isort
+
+10. **Mypy Type Checker**
+    - Static type checking
+    - Extension ID: ms-python.mypy-type-checker
+
+### Framework-Specific
+
+11. **Django** (for Django development)
+    - Django template support
+    - Extension ID: batisteo.vscode-django
+
+12. **Jinja** (for Flask/Jinja2)
+    - Jinja template syntax
+    - Extension ID: wholroyd.jinja
+
+### Data Science
+
+13. **Python Environment Manager**
+    - Manage virtual environments
+    - Extension ID: donjayamanne.python-environment-manager
+
+14. **Data Wrangler**
+    - Data viewing and cleaning
+    - Extension ID: ms-toolsai.datawrangler
+
+## Installation
+
+### Install Python
+
+#### macOS
+
+**Option 1: Using Homebrew (Recommended)**
+```bash
+# Install Python 3
+brew install python3
+
+# Or install specific version
+brew install python@3.11
+brew install python@3.12
+
+# Verify installation
+python3 --version
+pip3 --version
+
+# Create alias (add to ~/.zshrc)
+alias python=python3
+alias pip=pip3
+```
+
+**Option 2: Using pyenv (Multiple versions)**
+```bash
+# Install pyenv
+brew install pyenv
+
+# Add to ~/.zshrc
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
+echo 'eval "$(pyenv init -)"' >> ~/.zshrc
+
+# Restart terminal
+exec "$SHELL"
+
+# Install Python
+pyenv install 3.12.0
+pyenv install 3.11.6
+
+# Set global version
+pyenv global 3.12.0
+
+# Set local version for project
+cd my-project
+pyenv local 3.11.6
+
+# List versions
+pyenv versions
+
+# Verify
+python --version
+```
+
+**Option 3: Official Installer**
+- Download from https://www.python.org/downloads/
+- Run the installer
+- Check "Add Python to PATH"
+
+#### Linux
+
+**Using APT (Debian/Ubuntu)**
+```bash
+# Update package index
+sudo apt update
+
+# Install Python 3
+sudo apt install python3 python3-pip python3-venv
+
+# Verify installation
+python3 --version
+pip3 --version
+```
+
+**Using pyenv (Recommended for multiple versions)**
+```bash
+# Install dependencies
+sudo apt update
+sudo apt install -y make build-essential libssl-dev zlib1g-dev \
+  libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+  libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \
+  libffi-dev liblzma-dev
+
+# Install pyenv
+curl https://pyenv.run | bash
+
+# Add to ~/.bashrc
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+
+# Restart shell
+exec "$SHELL"
+
+# Install Python
+pyenv install 3.12.0
+pyenv global 3.12.0
+
+# Verify
+python --version
+```
+
+**Using YUM (RHEL/CentOS/Fedora)**
+```bash
+# Install Python 3
+sudo yum install python3 python3-pip
+
+# Or on Fedora
+sudo dnf install python3 python3-pip
+
+# Verify
+python3 --version
+```
+
+#### Windows
+
+**Option 1: Official Installer (Recommended)**
+1. Download from https://www.python.org/downloads/
+2. Run the installer
+3. **Important**: Check "Add Python to PATH"
+4. Click "Install Now"
+5. Verify in Command Prompt:
+```cmd
+python --version
+pip --version
+```
+
+**Option 2: Using Chocolatey**
+```powershell
+# Install Python
+choco install python
+
+# Verify
+python --version
+pip --version
+```
+
+**Option 3: Microsoft Store**
+1. Open Microsoft Store
+2. Search "Python 3.12"
+3. Install
+4. Verify in Command Prompt
+
+**Option 4: Using pyenv-win**
+```powershell
+# Install via PowerShell
+Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1" -OutFile "./install-pyenv-win.ps1"; &"./install-pyenv-win.ps1"
+
+# Then install Python
+pyenv install 3.12.0
+pyenv global 3.12.0
+```
+
+### Install Package Managers
+
+#### pip (included with Python)
+```bash
+# Upgrade pip
+python -m pip install --upgrade pip
+
+# Verify
+pip --version
+```
+
+#### pipx (for isolated CLI tools)
+```bash
+# Install pipx
+python -m pip install --user pipx
+python -m pipx ensurepath
+
+# Verify
+pipx --version
+
+# Install CLI tools
+pipx install black
+pipx install flake8
+pipx install poetry
+```
+
+#### Poetry (Modern dependency management)
+```bash
+# Install Poetry
+curl -sSL https://install.python-poetry.org | python3 -
+
+# Or via pipx
+pipx install poetry
+
+# Verify
+poetry --version
+```
+
+## Virtual Environments
+
+### Using venv (built-in)
+
+```bash
+# Create virtual environment
+python -m venv venv
+python -m venv .venv
+python -m venv myenv
+
+# Activate virtual environment
+# macOS/Linux:
+source venv/bin/activate
+
+# Windows (Command Prompt):
+venv\Scripts\activate.bat
+
+# Windows (PowerShell):
+venv\Scripts\Activate.ps1
+
+# Deactivate
+deactivate
+
+# Install packages in venv
+pip install package-name
+
+# Generate requirements.txt
+pip freeze > requirements.txt
+
+# Install from requirements.txt
+pip install -r requirements.txt
+```
+
+### Using virtualenv
+
+```bash
+# Install virtualenv
+pip install virtualenv
+
+# Create virtual environment
+virtualenv venv
+
+# With specific Python version
+virtualenv -p python3.11 venv
+
+# Activate (same as venv)
+source venv/bin/activate
+```
+
+### Using conda (Anaconda/Miniconda)
+
+```bash
+# Install Miniconda (lighter than Anaconda)
+# Download from https://docs.conda.io/en/latest/miniconda.html
+
+# Create environment
+conda create -n myenv python=3.11
+
+# Activate
+conda activate myenv
+
+# Deactivate
+conda deactivate
+
+# List environments
+conda env list
+
+# Install packages
+conda install numpy pandas
+
+# Export environment
+conda env export > environment.yml
+
+# Create from file
+conda env create -f environment.yml
+
+# Remove environment
+conda env remove -n myenv
+```
+
+### Using Poetry
+
+```bash
+# Initialize project
+poetry init
+
+# Or create new project
+poetry new my-project
+
+# Add dependency
+poetry add requests
+poetry add --group dev pytest
+
+# Install dependencies
+poetry install
+
+# Run script
+poetry run python script.py
+
+# Enter virtual environment
+poetry shell
+
+# Update dependencies
+poetry update
+```
+
+## How to Run Python Programs
+
+### Method 1: Direct Execution
+
+```bash
+# Run Python script
+python script.py
+python3 script.py
+
+# Run with arguments
+python script.py arg1 arg2
+
+# Run module as script
+python -m module_name
+
+# Interactive mode (REPL)
+python
+>>> print("Hello!")
+>>> exit()
+
+# Execute string
+python -c "print('Hello, World!')"
+```
+
+### Method 2: Make Script Executable (Unix/Linux/macOS)
+
+```bash
+# Add shebang to script (first line)
+#!/usr/bin/env python3
+
+# Make executable
+chmod +x script.py
+
+# Run
+./script.py
+```
+
+### Method 3: Using VSCode
+
+**Method 3a: Run Button**
+- Open Python file
+- Click "Run Python File" button (top right)
+- Or press `Ctrl+F5` (without debugging)
+- Or press `F5` (with debugging)
+
+**Method 3b: Right-click Menu**
+- Right-click in editor
+- Select "Run Python File in Terminal"
+
+**Method 3c: VSCode Terminal**
+```bash
+# Open terminal (Ctrl+` or Cmd+`)
+python script.py
+```
+
+### Method 4: Using IPython (Enhanced REPL)
+
+```bash
+# Install IPython
+pip install ipython
+
+# Run IPython
+ipython
+
+# Run script in IPython
+ipython script.py
+
+# Magic commands
+%run script.py
+%timeit function()
+%load script.py
+```
+
+### Method 5: Jupyter Notebook
+
+```bash
+# Install Jupyter
+pip install jupyter
+
+# Start Jupyter
+jupyter notebook
+
+# Or use JupyterLab
+pip install jupyterlab
+jupyter lab
+
+# In VSCode, open .ipynb files directly
+```
+
+## Project Setup
+
+### Create New Project
+
+```bash
+# Create project directory
+mkdir my-project
+cd my-project
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate     # Windows
+
+# Create basic structure
+mkdir src tests docs
+touch README.md .gitignore requirements.txt
+
+# Initialize git
+git init
+```
+
+### Install Packages
+
+```bash
+# Install single package
+pip install requests
+
+# Install specific version
+pip install requests==2.31.0
+pip install requests>=2.30.0
+
+# Install multiple packages
+pip install requests flask numpy pandas
+
+# Install from requirements.txt
+pip install -r requirements.txt
+
+# Install in editable mode (development)
+pip install -e .
+
+# Uninstall package
+pip uninstall package-name
+
+# List installed packages
+pip list
+pip freeze
+
+# Show package info
+pip show requests
+
+# Search packages
+pip search search-term  # Note: PyPI search disabled, use web
+
+# Update package
+pip install --upgrade package-name
+pip install -U package-name
+```
+
+### Generate requirements.txt
+
+```bash
+# Basic requirements
+pip freeze > requirements.txt
+
+# Or manually create requirements.txt:
+# requests==2.31.0
+# flask==3.0.0
+# numpy>=1.24.0
+# pandas>=2.0.0
+
+# With pipreqs (only used imports)
+pip install pipreqs
+pipreqs . --force
+```
+
+## Project Structure
+
+### Simple Python Project
+```
+my-project/
+├── venv/
+├── src/
+│   ├── __init__.py
+│   └── main.py
+├── tests/
+│   ├── __init__.py
+│   └── test_main.py
+├── .gitignore
+├── requirements.txt
+└── README.md
+```
+
+### Package Structure
+```
+my-package/
+├── src/
+│   └── mypackage/
+│       ├── __init__.py
+│       ├── core.py
+│       ├── utils.py
+│       └── subpackage/
+│           ├── __init__.py
+│           └── module.py
+├── tests/
+│   ├── __init__.py
+│   ├── test_core.py
+│   └── test_utils.py
+├── docs/
+│   └── index.md
+├── venv/
+├── .gitignore
+├── setup.py
+├── pyproject.toml
+├── requirements.txt
+├── requirements-dev.txt
+└── README.md
+```
+
+### Flask Web Application
+```
+flask-app/
+├── app/
+│   ├── __init__.py
+│   ├── models.py
+│   ├── views.py
+│   ├── forms.py
+│   ├── templates/
+│   │   ├── base.html
+│   │   └── index.html
+│   └── static/
+│       ├── css/
+│       ├── js/
+│       └── images/
+├── tests/
+├── venv/
+├── config.py
+├── requirements.txt
+├── .env
+├── .flaskenv
+└── run.py
+```
+
+### Django Project
+```
+django-project/
+├── myproject/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+├── myapp/
+│   ├── __init__.py
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── templates/
+│   └── migrations/
+├── static/
+├── media/
+├── templates/
+├── venv/
+├── manage.py
+├── requirements.txt
+└── .env
+```
+
+### Data Science Project
+```
+data-project/
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── external/
+├── notebooks/
+│   ├── 01-exploration.ipynb
+│   └── 02-analysis.ipynb
+├── src/
+│   ├── data/
+│   │   └── make_dataset.py
+│   ├── features/
+│   │   └── build_features.py
+│   └── models/
+│       ├── train_model.py
+│       └── predict_model.py
+├── models/
+├── reports/
+│   └── figures/
+├── venv/
+├── requirements.txt
+└── README.md
+```
+
+### Sample setup.py
+```python
+from setuptools import setup, find_packages
+
+setup(
+    name="mypackage",
+    version="0.1.0",
+    author="Your Name",
+    author_email="your.email@example.com",
+    description="A short description",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/yourusername/mypackage",
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    python_requires=">=3.8",
+    install_requires=[
+        "requests>=2.28.0",
+        "numpy>=1.24.0",
+    ],
+    extras_require={
+        "dev": [
+            "pytest>=7.0.0",
+            "black>=23.0.0",
+            "flake8>=6.0.0",
+        ],
+    },
+)
+```
+
+### Sample pyproject.toml (Modern)
+```toml
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mypackage"
+version = "0.1.0"
+description = "A short description"
+readme = "README.md"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "requests>=2.28.0",
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+```
+
+### Sample .gitignore (Python)
+```
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+data/raw/*
+!data/raw/.gitkeep
+models/*
+!models/.gitkeep
+```
+
+## Where is the Documentation
+
+### Official Documentation
+
+1. **Python Official Docs** - https://docs.python.org/3/
+   - Tutorial, library reference, language reference
+   - Most authoritative source
+
+2. **Python Standard Library** - https://docs.python.org/3/library/
+   - Complete standard library documentation
+   - Built-in modules and functions
+
+3. **Python Enhancement Proposals (PEPs)** - https://peps.python.org/
+   - PEP 8: Style Guide
+   - PEP 20: Zen of Python
+   - Feature proposals and decisions
+
+4. **PyPI (Python Package Index)** - https://pypi.org/
+   - Official package repository
+   - Package documentation links
+
+### Learning Resources
+
+1. **Real Python** - https://realpython.com/
+   - High-quality tutorials
+   - Video courses
+   - Podcasts
+
+2. **Python.org Beginner's Guide** - https://wiki.python.org/moin/BeginnersGuide
+   - Official beginner resources
+   - Learning paths
+
+3. **Full Stack Python** - https://www.fullstackpython.com/
+   - Comprehensive Python guide
+   - Web development focus
+
+4. **Python Institute** - https://pythoninstitute.org/
+   - Certification programs
+   - Free courses
+
+### Books
+
+1. **Python Crash Course** - By Eric Matthes
+   - Beginner-friendly
+   - Project-based learning
+
+2. **Automate the Boring Stuff with Python** - By Al Sweigart
+   - Practical automation
+   - Free online: https://automatetheboringstuff.com/
+
+3. **Fluent Python** - By Luciano Ramalho
+   - Advanced Python
+   - Best practices
+
+4. **Python Cookbook** - By David Beazley & Brian K. Jones
+   - Recipes for common tasks
+   - Advanced techniques
+
+5. **Effective Python** - By Brett Slatkin
+   - 90 specific ways to write better Python
+   - Best practices
+
+6. **Learning Python** - By Mark Lutz
+   - Comprehensive reference
+   - In-depth coverage
+
+### Framework Documentation
+
+1. **Django** - https://docs.djangoproject.com/
+   - Full-stack web framework
+   - "Batteries included"
+
+2. **Flask** - https://flask.palletsprojects.com/
+   - Micro web framework
+   - Lightweight and flexible
+
+3. **FastAPI** - https://fastapi.tiangolo.com/
+   - Modern API framework
+   - Fast, with auto docs
+
+4. **Pandas** - https://pandas.pydata.org/docs/
+   - Data manipulation
+   - DataFrames
+
+5. **NumPy** - https://numpy.org/doc/
+   - Numerical computing
+   - Arrays and linear algebra
+
+6. **Scikit-learn** - https://scikit-learn.org/stable/
+   - Machine learning
+   - Comprehensive algorithms
+
+7. **TensorFlow** - https://www.tensorflow.org/
+   - Deep learning
+   - Neural networks
+
+8. **PyTorch** - https://pytorch.org/docs/
+   - Deep learning
+   - Research-friendly
+
+### Testing Frameworks
+
+1. **pytest** - https://docs.pytest.org/
+   - Popular testing framework
+   - Rich plugin ecosystem
+
+2. **unittest** - https://docs.python.org/3/library/unittest.html
+   - Built-in testing
+   - Part of standard library
+
+3. **doctest** - https://docs.python.org/3/library/doctest.html
+   - Test via docstrings
+   - Documentation testing
+
+### Code Quality Tools
+
+1. **Black** - https://black.readthedocs.io/
+   - Opinionated formatter
+   - "The uncompromising code formatter"
+
+2. **Ruff** - https://docs.astral.sh/ruff/
+   - Extremely fast linter
+   - Replaces flake8, isort, and more
+
+3. **Pylint** - https://pylint.readthedocs.io/
+   - Code analysis
+   - Code quality checks
+
+4. **mypy** - https://mypy.readthedocs.io/
+   - Static type checker
+   - Type hints validation
+
+### Community and Support
+
+1. **Stack Overflow** - Tag: `python`
+   - Q&A for specific problems
+   - Huge community
+
+2. **Reddit**
+   - r/Python - General Python
+   - r/learnpython - Learning help
+   - r/django, r/flask - Framework-specific
+
+3. **Python Discord** - https://pythondiscord.com/
+   - Active community
+   - Real-time help
+
+4. **Python.org Community** - https://www.python.org/community/
+   - Mailing lists
+   - Forums
+
+5. **PyCon** - Annual Python conference
+   - Talks and tutorials
+   - Videos available on YouTube
+
+### YouTube Channels
+
+1. **Corey Schafer** - Excellent Python tutorials
+2. **Real Python** - Quality video courses
+3. **Tech With Tim** - Python projects and tutorials
+4. **mCoding** - Advanced Python concepts
+5. **ArjanCodes** - Software design and architecture
+6. **sentdex** - Python programming and data science
+
+### Cheat Sheets
+
+1. **Python Cheat Sheet** - https://www.pythoncheatsheet.org/
+2. **Real Python Cheat Sheets** - https://realpython.com/python-cheat-sheet/
+3. **Comprehensive Python Cheatsheet** - https://gto76.github.io/python-cheatsheet/
+
+## Python Versions
+
+### Version History
+
+- **Python 2.7** (2010) - Legacy, end of life January 2020
+- **Python 3.6** (2016) - f-strings, type hints
+- **Python 3.7** (2018) - dataclasses, ordered dicts
+- **Python 3.8** (2019) - walrus operator, positional-only parameters
+- **Python 3.9** (2020) - dict merge, type hints improvements
+- **Python 3.10** (2021) - structural pattern matching, better error messages
+- **Python 3.11** (2022) - 10-60% faster, better error locations
+- **Python 3.12** (2023) - Improved error messages, performance gains
+- **Python 3.13** (2024+) - Upcoming features
+
+### Recommended Versions
+- **Python 3.11**: Great performance, stable
+- **Python 3.12**: Latest stable, fastest
+- **Python 3.10**: Widely supported, solid choice
+
+### Modern Python Features
+
+```python
+# f-strings (3.6+)
+name = "World"
+print(f"Hello, {name}!")
+
+# Type hints (3.5+)
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+# dataclasses (3.7+)
+from dataclasses import dataclass
+
+@dataclass
+class Person:
+    name: str
+    age: int
+
+# Walrus operator (3.8+)
+if (n := len(items)) > 10:
+    print(f"Too many items: {n}")
+
+# Dict merge (3.9+)
+dict1 = {"a": 1}
+dict2 = {"b": 2}
+merged = dict1 | dict2
+
+# Pattern matching (3.10+)
+match status:
+    case 200:
+        print("Success")
+    case 404:
+        print("Not found")
+    case _:
+        print("Unknown")
+
+# Improved error messages (3.11+)
+# Better traceback and suggestions
+```
+
+## Common Commands
+
+```bash
+# Python version
+python --version
+python -V
+
+# pip version
+pip --version
+
+# Install package
+pip install package-name
+
+# Install from requirements
+pip install -r requirements.txt
+
+# Upgrade package
+pip install --upgrade package-name
+pip install -U package-name
+
+# Uninstall
+pip uninstall package-name
+
+# List packages
+pip list
+pip freeze
+
+# Show package info
+pip show package-name
+
+# Create virtual environment
+python -m venv venv
+
+# Activate venv
+source venv/bin/activate  # Unix
+venv\Scripts\activate     # Windows
+
+# Deactivate
+deactivate
+
+# Run script
+python script.py
+
+# Run module
+python -m module_name
+
+# Interactive mode
+python
+
+# Run with unbuffered output
+python -u script.py
+
+# Optimize (remove assert statements, __debug__)
+python -O script.py
+
+# Check syntax without running
+python -m py_compile script.py
+
+# Format code
+black script.py
+black .
+
+# Lint code
+ruff check .
+flake8 script.py
+pylint script.py
+
+# Type check
+mypy script.py
+
+# Run tests
+pytest
+pytest tests/
+pytest -v  # verbose
+pytest -k test_function  # specific test
+pytest --cov  # coverage
+
+# Install package in editable mode
+pip install -e .
+
+# Build package
+python -m build
+
+# Create wheel
+python setup.py bdist_wheel
+```
+
+## Best Practices
+
+1. **Follow PEP 8**: Python's style guide
+   - Use 4 spaces for indentation
+   - Max line length 79 characters (or 88 for Black)
+   - Use snake_case for functions and variables
+   - Use PascalCase for classes
+
+2. **Use virtual environments**: Isolate project dependencies
+
+3. **Type hints**: Add type annotations for better code
+   ```python
+   def add(a: int, b: int) -> int:
+       return a + b
+   ```
+
+4. **Docstrings**: Document functions and classes
+   ```python
+   def function(param: str) -> bool:
+       """
+       Brief description.
+       
+       Args:
+           param: Description of parameter
+           
+       Returns:
+           Description of return value
+       """
+       pass
+   ```
+
+5. **Use list comprehensions**: More Pythonic
+   ```python
+   # Instead of
+   result = []
+   for item in items:
+       result.append(item * 2)
+   
+   # Use
+   result = [item * 2 for item in items]
+   ```
+
+6. **Context managers**: Use `with` for resource management
+   ```python
+   with open('file.txt', 'r') as f:
+       content = f.read()
+   ```
+
+7. **Use `if __name__ == "__main__"`**: For executable scripts
+
+8. **Exception handling**: Use specific exceptions
+   ```python
+   try:
+       result = risky_operation()
+   except ValueError as e:
+       print(f"Error: {e}")
+   except Exception as e:
+       print(f"Unexpected error: {e}")
+   ```
+
+9. **Use pathlib**: Modern file path handling
+   ```python
+   from pathlib import Path
+   
+   path = Path("data/file.txt")
+   if path.exists():
+       content = path.read_text()
+   ```
+
+10. **Keep functions small**: Single responsibility principle
+
+11. **Use enumerate**: Instead of range(len())
+    ```python
+    for i, item in enumerate(items):
+        print(f"{i}: {item}")
+    ```
+
+12. **Use generators**: Memory efficient for large datasets
+    ```python
+    def read_large_file(file_path):
+        with open(file_path, 'r') as f:
+            for line in f:
+                yield line
+    ```
+
+13. **Avoid mutable default arguments**:
+    ```python
+    # Bad
+    def append_to(element, list=[]):
+        list.append(element)
+        return list
+    
+    # Good
+    def append_to(element, list=None):
+        if list is None:
+            list = []
+        list.append(element)
+        return list
+    ```
+
+14. **Use f-strings**: More readable than format() or %
+
+15. **Write tests**: Use pytest or unittest
+
+## Common Patterns
+
+### List Comprehension
+```python
+# Basic
+squares = [x**2 for x in range(10)]
+
+# With condition
+evens = [x for x in range(10) if x % 2 == 0]
+
+# Nested
+matrix = [[i*j for j in range(3)] for i in range(3)]
+```
+
+### Dictionary Comprehension
+```python
+# Basic
+squares = {x: x**2 for x in range(5)}
+
+# From lists
+keys = ['a', 'b', 'c']
+values = [1, 2, 3]
+d = {k: v for k, v in zip(keys, values)}
+```
+
+### Generator Expression
+```python
+# Memory efficient
+sum_of_squares = sum(x**2 for x in range(1000000))
+```
+
+### Unpacking
+```python
+# Multiple assignment
+a, b = 1, 2
+a, b = b, a  # Swap
+
+# Extended unpacking
+first, *middle, last = [1, 2, 3, 4, 5]
+
+# Function arguments
+def func(a, b, c):
+    pass
+
+args = [1, 2, 3]
+func(*args)
+
+kwargs = {'a': 1, 'b': 2, 'c': 3}
+func(**kwargs)
+```
+
+### Decorator
+```python
+from functools import wraps
+import time
+
+def timing_decorator(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(f"{func.__name__} took {end - start:.4f}s")
+        return result
+    return wrapper
+
+@timing_decorator
+def slow_function():
+    time.sleep(1)
+```
+
+### Context Manager
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def managed_resource():
+    # Setup
+    resource = acquire_resource()
+    try:
+        yield resource
+    finally:
+        # Cleanup
+        release_resource(resource)
+
+with managed_resource() as resource:
+    use(resource)
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"python: command not found"**
+   ```bash
+   # Check installation
+   which python3
+   
+   # Use python3 instead
+   python3 --version
+   
+   # Or create alias
+   alias python=python3
+   ```
+
+2. **"pip: command not found"**
+   ```bash
+   # Use python -m pip
+   python -m pip install package-name
+   
+   # Or install pip
+   python -m ensurepip --upgrade
+   ```
+
+3. **"Permission denied" when installing packages**
+   ```bash
+   # Don't use sudo! Use virtual environment
+   python -m venv venv
+   source venv/bin/activate
+   pip install package-name
+   
+   # Or install for user only
+   pip install --user package-name
+   ```
+
+4. **"ModuleNotFoundError"**
+   ```bash
+   # Install the module
+   pip install module-name
+   
+   # Check virtual environment is activated
+   which python
+   
+   # Check PYTHONPATH
+   echo $PYTHONPATH
+   ```
+
+5. **"IndentationError"**
+   - Use consistent indentation (4 spaces)
+   - Don't mix tabs and spaces
+   - Use an editor with Python support
+
+6. **Virtual environment not activating on Windows PowerShell**
+   ```powershell
+   # Enable script execution
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   
+   # Then activate
+   venv\Scripts\Activate.ps1
+   ```
+
+7. **Import errors with relative imports**
+   ```python
+   # Use absolute imports
+   from mypackage.module import function
+   
+   # Or run as module
+   python -m mypackage.script
+   ```
+
+8. **VSCode not finding virtual environment**
+   - Cmd/Ctrl + Shift + P → "Python: Select Interpreter"
+   - Choose venv/bin/python
+   - Reload window
+
+9. **"SyntaxError: invalid syntax"**
+   ```python
+   # Common causes:
+   # 1. Missing colon after def, if, for, while, class
+   def greet()      # ❌ Wrong
+   def greet():     # ✅ Correct
+   
+   # 2. Mismatched parentheses/brackets
+   print("Hello"    # ❌ Wrong
+   print("Hello")   # ✅ Correct
+   
+   # 3. Using Python 2 syntax in Python 3
+   print "Hello"    # ❌ Python 2
+   print("Hello")   # ✅ Python 3
+   ```
+
+10. **Script runs but no output**
+    ```python
+    # Check if main() is being called
+    def main():
+        print("Hello world!")
+    
+    # Missing this line - nothing will run!
+    if __name__ == "__main__":
+        main()  # ← Add this!
+    ```
+
+11. **"NameError: name 'X' is not defined"**
+    ```python
+    # Define before use
+    message = "Hello"  # Define first
+    print(message)     # Then use
+    
+    # Import before use
+    import os          # Import first
+    os.path.exists()   # Then use
+    ```
+
+12. **Different behavior in REPL vs script**
+    ```bash
+    # In REPL, expressions auto-print
+    >>> "Hello"
+    'Hello'
+    
+    # In script, you must print
+    # script.py
+    "Hello"  # No output
+    print("Hello")  # Output: Hello
+    ```
+
+13. **Python 2 vs Python 3 issues**
+    ```bash
+    # Check which Python is running
+    python --version
+    
+    # Always use python3 for new projects
+    python3 script.py
+    
+    # Create alias (add to ~/.zshrc or ~/.bashrc)
+    alias python=python3
+    ```
+
+14. **"ImportError: No module named 'X'"**
+    ```bash
+    # Check if module is installed
+    pip list | grep module-name
+    
+    # Install the module
+    pip install module-name
+    
+    # Check if virtual environment is activated
+    which python  # Should show venv/bin/python
+    
+    # Reinstall if needed
+    pip install --force-reinstall module-name
+    ```
+
+15. **Permission denied when running script**
+    ```bash
+    # Make script executable
+    chmod +x script.py
+    
+    # Check shebang line
+    head -1 script.py  # Should be: #!/usr/bin/env python3
+    ```
+
+### Practical Troubleshooting Example
+
+**Problem: Script created but doesn't run**
+
+```bash
+$ ./01-hello-world.py
+zsh: permission denied: ./01-hello-world.py
+```
+
+**Solution:**
+```bash
+# Step 1: Check file permissions
+ls -l 01-hello-world.py
+# -rw-r--r-- (not executable)
+
+# Step 2: Make executable
+chmod +x 01-hello-world.py
+
+# Step 3: Verify shebang
+head -1 01-hello-world.py
+# #!/usr/bin/env python3
+
+# Step 4: Run again
+./01-hello-world.py
+# Hello world!
+```
+
+**Problem: No output from script**
+
+```python
+# bad_script.py
+def main():
+    print("Hello world!")
+
+# Missing execution!
+```
+
+**Solution:**
+```python
+# good_script.py
+def main():
+    print("Hello world!")
+
+if __name__ == "__main__":  # Add this!
+    main()
+```
+
+**Problem: Wrong Python version**
+
+```bash
+$ python --version
+Python 2.7.16  # Old version!
+
+$ python script.py
+SyntaxError: invalid syntax  # Python 3 code doesn't work
+```
+
+**Solution:**
+```bash
+# Use python3 explicitly
+python3 script.py
+
+# Or create alias (add to ~/.zshrc)
+alias python=python3
+
+# Or use pyenv to manage versions
+pyenv install 3.12.0
+pyenv global 3.12.0
+```
+
+## Environment Variables
+
+```bash
+# Set PYTHONPATH (add to ~/.zshrc or ~/.bashrc)
+export PYTHONPATH="${PYTHONPATH}:/path/to/your/project"
+
+# Python executable location
+export PYTHON_HOME=/usr/local/bin/python3
+
+# Virtual environment directory
+export WORKON_HOME=$HOME/.virtualenvs
+
+# Disable .pyc files
+export PYTHONDONTWRITEBYTECODE=1
+
+# Unbuffered output
+export PYTHONUNBUFFERED=1
+```
+
+### Using .env files
+
+```bash
+# Install python-dotenv
+pip install python-dotenv
+```
+
+```python
+# .env file
+DATABASE_URL=postgresql://localhost/mydb
+API_KEY=your-secret-key
+DEBUG=True
+
+# Load in Python
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+db_url = os.getenv('DATABASE_URL')
+api_key = os.getenv('API_KEY')
+debug = os.getenv('DEBUG', 'False') == 'True'
+```
+
+## Quick Start Examples
+
+### Basic Hello World
+
+**Step 1: Create the Python file**
+
+```python
+# 01-hello-world.py
+#!/usr/bin/env python3
+"""Simple Python program to print Hello world!"""
+
+def main():
+    """Main function - entry point of the program."""
+    print("Hello world!")
+
+if __name__ == "__main__":
+    main()
+```
+
+**Step 2: Run the program**
+
+```bash
+# Method 1: Run with python3
+python3 01-hello-world.py
+
+# Method 2: Run with python
+python 01-hello-world.py
+
+# Method 3: Make executable and run
+chmod +x 01-hello-world.py
+./01-hello-world.py
+```
+
+**Expected Output:**
+```
+Hello world!
+```
+
+**Key Points:**
+- ❌ No compilation step required
+- ❌ No class definition needed (unlike Java)
+- ❌ No main() required (but recommended for good practice)
+- ✅ Simple, readable syntax
+- ✅ Automatic bytecode caching (.pyc files)
+
+### Python vs Compiled Languages
+
+**Java (requires explicit compilation):**
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello world!");
+    }
+}
+```
+```bash
+javac HelloWorld.java  # Compile step
+java HelloWorld        # Run step
+```
+
+**Python (interpreted/auto-compiled):**
+```python
+print("Hello world!")
+```
+```bash
+python hello.py  # Run directly, compiles to bytecode automatically
+```
+
+### Minimal vs Recommended Structure
+
+**Minimal (simplest):**
+```python
+# hello.py
+print("Hello world!")
+```
+
+**Recommended (production-ready):**
+```python
+#!/usr/bin/env python3
+"""Module docstring - describes what this file does."""
+
+def main():
+    """Main function docstring."""
+    print("Hello world!")
+
+if __name__ == "__main__":
+    main()
+```
+
+**Why use the recommended structure?**
+1. **Shebang** - Makes script executable on Unix/Linux/macOS
+2. **Docstrings** - Self-documenting code
+3. **main()** - Better code organization
+4. **if __name__ == "__main__"** - Allows importing without execution
+
+### Different Print Methods
+
+```python
+# 1. Basic print
+print("Hello world!")
+
+# 2. F-strings (Python 3.6+) - RECOMMENDED
+name = "world"
+print(f"Hello {name}!")
+
+# 3. .format() method
+print("Hello {}!".format("world"))
+
+# 4. % formatting (old style)
+print("Hello %s!" % "world")
+
+# 5. String concatenation
+print("Hello" + " " + "world!")
+
+# 6. Multiple arguments
+print("Hello", "world!")
+
+# 7. Without newline
+print("Hello world!", end="")
+```
+
+### Compilation to Bytecode
+
+Python automatically compiles to bytecode:
+
+```bash
+# Run normally (creates .pyc automatically when imported)
+python3 01-hello-world.py
+
+# Manually compile to bytecode
+python3 -m py_compile 01-hello-world.py
+
+# Creates: __pycache__/01-hello-world.cpython-39.pyc
+
+# Run compiled bytecode
+python3 __pycache__/01-hello-world.cpython-*.pyc
+```
+
+**Bytecode characteristics:**
+- Platform-independent
+- Python version-specific
+- Faster to load than source
+- Automatically regenerated if source changes
+
+### With Command-Line Arguments
+
+```python
+# hello.py
+import sys
+
+def main():
+    if len(sys.argv) > 1:
+        print(f"Hello {sys.argv[1]}!")
+    else:
+        print("Hello world!")
+
+if __name__ == "__main__":
+    main()
+```
+
+```bash
+python3 hello.py        # Output: Hello world!
+python3 hello.py Alice  # Output: Hello Alice!
+```
+
+### Simple Function Example
+```python
+def greet(name: str) -> str:
+    """Greet a person by name."""
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    print(greet("World"))
+```
+
+### Read/Write File
+```python
+# Write to file
+with open('data.txt', 'w') as f:
+    f.write("Hello, World!\n")
+
+# Read from file
+with open('data.txt', 'r') as f:
+    content = f.read()
+    print(content)
+```
+
+### Simple Web Server (Flask)
+```python
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return "Hello, World!"
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+```bash
+pip install flask
+python app.py
+# Visit http://localhost:5000
+```
+
+### API Request
+```python
+import requests
+
+response = requests.get('https://api.github.com/users/github')
+data = response.json()
+print(data['name'])
+```
+
+```bash
+pip install requests
+python script.py
+```
+
+### Data Analysis (Pandas)
+```python
+import pandas as pd
+
+# Create DataFrame
+df = pd.DataFrame({
+    'name': ['Alice', 'Bob', 'Charlie'],
+    'age': [25, 30, 35],
+    'city': ['NY', 'LA', 'SF']
+})
+
+# Display data
+print(df)
+
+# Basic statistics
+print(df.describe())
+
+# Filter data
+young = df[df['age'] < 30]
+print(young)
+```
+
+```bash
+pip install pandas
+python analysis.py
+```
+

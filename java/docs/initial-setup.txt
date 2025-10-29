@@ -1,0 +1,1099 @@
+# Java Initial Setup Guide
+
+## What is Java?
+
+Java is a high-level, class-based, object-oriented programming language designed to have as few implementation dependencies as possible. It follows the "Write Once, Run Anywhere" (WORA) principle, meaning compiled Java code can run on all platforms that support Java without recompilation.
+
+## Extensions in VSCode
+
+1. **Extension Pack for Java (Microsoft)** - Essential
+   - Includes Language Support, Debugging, Testing, Maven, Project Manager
+   - Extension ID: vscjava.vscode-java-pack
+
+2. **Language Support for Java (Red Hat)** - Included in pack above
+   - IntelliSense, code navigation, refactoring
+   - Extension ID: redhat.java
+
+3. **Debugger for Java** - Included in pack
+   - Debugging support
+   - Extension ID: vscjava.vscode-java-debug
+
+4. **Test Runner for Java** - Included in pack
+   - Run and debug JUnit/TestNG tests
+   - Extension ID: vscjava.vscode-java-test
+
+5. **Maven for Java** - Included in pack
+   - Maven project support
+   - Extension ID: vscjava.vscode-maven
+
+6. **Project Manager for Java** - Included in pack
+   - Manage Java projects
+   - Extension ID: vscjava.vscode-java-dependency
+
+### Optional but Recommended Extensions
+
+7. **Spring Boot Extension Pack**
+   - For Spring Boot development
+   - Extension ID: vmware.vscode-boot-dev-pack
+
+8. **SonarLint**
+   - Code quality and security analysis
+   - Extension ID: SonarSource.sonarlint-vscode
+
+9. **Lombok Annotations Support**
+   - Support for Project Lombok
+   - Extension ID: GabrielBB.vscode-lombok
+
+10. **Gradle for Java**
+    - Gradle build tool support
+    - Extension ID: vscjava.vscode-gradle
+
+## Installation
+
+### Install Java Development Kit (JDK)
+
+#### macOS
+
+**Option 1: Using Homebrew**
+```bash
+# Install OpenJDK (latest version)
+brew install openjdk
+
+# Or install specific version
+brew install openjdk@17
+brew install openjdk@21
+
+# Link to system Java
+sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+
+# Verify installation
+java -version
+javac -version
+```
+
+**Option 2: Using SDKMAN**
+```bash
+# Install SDKMAN
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# Install Java
+sdk install java
+
+# List available versions
+sdk list java
+
+# Install specific version
+sdk install java 17.0.9-tem
+sdk install java 21.0.1-oracle
+```
+
+#### Linux
+
+**Using SDKMAN (Recommended)**
+```bash
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java
+```
+
+**Using APT (Debian/Ubuntu)**
+```bash
+# Update package index
+sudo apt update
+
+# Install OpenJDK 17
+sudo apt install openjdk-17-jdk
+
+# Or install OpenJDK 21
+sudo apt install openjdk-21-jdk
+
+# Verify installation
+java -version
+javac -version
+```
+
+**Using YUM (RHEL/CentOS/Fedora)**
+```bash
+# Install OpenJDK 17
+sudo yum install java-17-openjdk-devel
+
+# Or install OpenJDK 21
+sudo yum install java-21-openjdk-devel
+```
+
+#### Windows
+
+**Option 1: Using Chocolatey**
+```powershell
+# Install OpenJDK
+choco install openjdk
+
+# Or install specific version
+choco install openjdk17
+choco install openjdk21
+```
+
+**Option 2: Manual Installation**
+1. Download JDK from:
+   - Oracle JDK: https://www.oracle.com/java/technologies/downloads/
+   - OpenJDK: https://adoptium.net/ or https://jdk.java.net/
+2. Run the installer
+3. Set JAVA_HOME environment variable
+4. Add `%JAVA_HOME%\bin` to PATH
+
+### Install Build Tools
+
+#### Maven
+```bash
+# macOS
+brew install maven
+
+# Linux (SDKMAN)
+sdk install maven
+
+# Linux (APT)
+sudo apt install maven
+
+# Windows (Chocolatey)
+choco install maven
+
+# Verify
+mvn -version
+```
+
+#### Gradle
+```bash
+# macOS
+brew install gradle
+
+# Linux (SDKMAN)
+sdk install gradle
+
+# Linux (APT)
+sudo apt install gradle
+
+# Windows (Chocolatey)
+choco install gradle
+
+# Verify
+gradle -version
+```
+
+## How to Compile and Run Java Programs
+
+### Method 1: Using javac and java (Basic)
+```bash
+# Compile a single file
+javac HelloWorld.java
+
+# Run the compiled class
+java HelloWorld
+
+# Compile with specific Java version
+javac --release 17 HelloWorld.java
+
+# Compile multiple files
+javac *.java
+
+# Compile with classpath
+javac -cp lib/*:. MyClass.java
+
+# Run with classpath
+java -cp lib/*:. MyClass
+```
+
+### Method 2: Using Maven
+
+**Create a new Maven project:**
+```bash
+mvn archetype:generate \
+  -DgroupId=com.example \
+  -DartifactId=my-app \
+  -DarchetypeArtifactId=maven-archetype-quickstart \
+  -DinteractiveMode=false
+
+cd my-app
+```
+
+**Common Maven commands:**
+```bash
+# Compile the project
+mvn compile
+
+# Run tests
+mvn test
+
+# Package (create JAR)
+mvn package
+
+# Clean build artifacts
+mvn clean
+
+# Clean and package
+mvn clean package
+
+# Install to local repository
+mvn install
+
+# Run specific class with exec plugin
+mvn exec:java -Dexec.mainClass="com.example.Main"
+
+# Run with dependencies
+mvn clean compile exec:java
+```
+
+### Method 3: Using Gradle
+
+**Create a new Gradle project:**
+```bash
+# Initialize Gradle project
+gradle init --type java-application
+
+# Or for a library
+gradle init --type java-library
+```
+
+**Common Gradle commands:**
+```bash
+# Build the project
+gradle build
+
+# Run tests
+gradle test
+
+# Run the application
+gradle run
+
+# Clean build artifacts
+gradle clean
+
+# Clean and build
+gradle clean build
+
+# Create executable JAR
+gradle jar
+
+# List all tasks
+gradle tasks
+```
+
+### Method 4: Using VSCode
+1. Open Java file in VSCode
+2. Click "Run" button above the main method
+3. Or press `F5` to debug
+4. Or right-click → "Run Java"
+
+### Method 5: Create Executable JAR
+
+**With Maven (pom.xml):**
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.3.0</version>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <mainClass>com.example.Main</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+**With Gradle (build.gradle):**
+```groovy
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.example.Main'
+    }
+}
+```
+
+**Run JAR:**
+```bash
+java -jar target/my-app-1.0.jar
+```
+
+## Project Structure
+
+### Simple Java Project
+```
+project/
+├── src/
+│   └── HelloWorld.java
+└── README.md
+```
+
+### Maven Project Structure
+```
+my-app/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── example/
+│   │   │           └── App.java
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/
+│       ├── java/
+│       │   └── com/
+│       │       └── example/
+│       │           └── AppTest.java
+│       └── resources/
+├── pom.xml
+├── target/
+└── README.md
+```
+
+### Gradle Project Structure
+```
+my-app/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── example/
+│   │   │           └── App.java
+│   │   └── resources/
+│   └── test/
+│       ├── java/
+│       │   └── com/
+│       │       └── example/
+│       │           └── AppTest.java
+│       └── resources/
+├── build.gradle
+├── settings.gradle
+├── gradlew
+├── gradlew.bat
+├── gradle/
+│   └── wrapper/
+└── build/
+```
+
+### Sample pom.xml (Maven)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>my-app</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+### Sample build.gradle (Gradle)
+```groovy
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JUnit 5
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    
+    // Add your dependencies here
+    implementation 'com.google.guava:guava:32.1.3-jre'
+}
+
+application {
+    mainClass = 'com.example.App'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+```
+
+## Where is the Documentation
+
+### Official Documentation
+
+1. **Java Documentation** - https://docs.oracle.com/en/java/
+   - Official Oracle Java documentation
+   - API specifications
+
+2. **Java SE API Documentation** - https://docs.oracle.com/en/java/javase/17/docs/api/
+   - Complete Java Standard Edition API
+   - Replace 17 with your Java version (11, 17, 21, etc.)
+
+3. **Java Language Specification** - https://docs.oracle.com/javase/specs/
+   - Formal language specification
+   - JVM specification
+
+4. **Java Tutorials** - https://docs.oracle.com/javase/tutorial/
+   - Official Oracle tutorials
+   - Comprehensive learning path
+
+### Build Tools Documentation
+
+1. **Maven Documentation** - https://maven.apache.org/guides/
+   - Getting started guide
+   - Plugin documentation
+
+2. **Gradle Documentation** - https://docs.gradle.org/
+   - User manual
+   - Build configuration
+
+### Framework Documentation
+
+1. **Spring Framework** - https://spring.io/projects/spring-framework
+   - Most popular Java framework
+   - Comprehensive documentation
+
+2. **Spring Boot** - https://spring.io/projects/spring-boot
+   - Rapid application development
+   - Auto-configuration
+
+3. **Jakarta EE** - https://jakarta.ee/
+   - Enterprise Java specifications
+   - Formerly Java EE
+
+4. **Hibernate (ORM)** - https://hibernate.org/orm/documentation/
+   - Object-Relational Mapping
+   - Database integration
+
+### Testing Frameworks
+
+1. **JUnit 5** - https://junit.org/junit5/docs/current/user-guide/
+   - Unit testing framework
+   - Most widely used
+
+2. **Mockito** - https://site.mockito.org/
+   - Mocking framework
+   - Test doubles
+
+3. **AssertJ** - https://assertj.github.io/doc/
+   - Fluent assertions
+   - Readable test code
+
+### Learning Resources
+
+1. **Baeldung** - https://www.baeldung.com/
+   - High-quality Java tutorials
+   - Updated regularly
+
+2. **Java Design Patterns** - https://java-design-patterns.com/
+   - Implementation of design patterns
+   - Best practices
+
+3. **Effective Java (Book)** - By Joshua Bloch
+   - Best practices and idioms
+   - Must-read for Java developers
+
+4. **Java: The Complete Reference (Book)** - By Herbert Schildt
+   - Comprehensive Java guide
+   - Reference manual
+
+5. **Head First Java (Book)** - By Kathy Sierra
+   - Beginner-friendly
+   - Visual learning approach
+
+6. **Java Brains (YouTube)** - https://www.youtube.com/@Java.Brains
+   - Video tutorials
+   - Spring and Java EE
+
+### Community and Support
+
+1. **Stack Overflow** - Tag: `java`
+   - Q&A for specific problems
+   - Largest Java community
+
+2. **Reddit** - r/java, r/learnjava
+   - Discussions and news
+   - Community help
+
+3. **Java User Groups (JUGs)**
+   - Local meetups
+   - Networking
+
+4. **DZone Java Zone** - https://dzone.com/java-jdk-development-tutorials-tools-news
+   - Articles and tutorials
+   - Latest news
+
+5. **InfoQ Java** - https://www.infoq.com/java/
+   - Enterprise Java news
+   - Conference talks
+
+## Java Versions and Features
+
+### Java Version History (LTS versions in bold)
+
+- **Java 8 (LTS)** - Lambdas, Stream API, Optional
+- Java 9 - Module system, JShell
+- Java 10 - Local variable type inference (var)
+- **Java 11 (LTS)** - String methods, HTTP Client
+- Java 12-16 - Various improvements
+- **Java 17 (LTS)** - Sealed classes, Pattern matching
+- Java 18-20 - Preview features
+- **Java 21 (LTS)** - Virtual threads, Record patterns, Sequenced collections
+
+### Recommended Versions
+- **Java 17**: Current standard for most projects
+- **Java 21**: Latest LTS, cutting-edge features
+- **Java 11**: Still widely used in enterprise
+
+## Common Java Commands
+
+```bash
+# Check Java version
+java -version
+javac -version
+
+# Compile a Java file
+javac MyClass.java
+
+# Run a Java class
+java MyClass
+
+# Run with specific memory settings
+java -Xmx512m -Xms256m MyClass
+
+# List available Java installations (macOS)
+/usr/libexec/java_home -V
+
+# Switch Java version (with SDKMAN)
+sdk use java 17.0.9-tem
+
+# Create JAR file manually
+jar cvf myapp.jar -C build/classes .
+
+# View JAR contents
+jar tf myapp.jar
+
+# Extract JAR
+jar xf myapp.jar
+
+# Run JAR with classpath
+java -cp myapp.jar:lib/* com.example.Main
+
+# Enable preview features (Java 17+)
+javac --enable-preview --release 17 MyClass.java
+java --enable-preview MyClass
+```
+
+## Best Practices
+
+1. **Follow naming conventions**
+   - Classes: PascalCase (e.g., `UserService`)
+   - Methods/Variables: camelCase (e.g., `getUserName`)
+   - Constants: UPPER_SNAKE_CASE (e.g., `MAX_SIZE`)
+   - Packages: lowercase (e.g., `com.example.project`)
+
+2. **Use meaningful names**: Self-documenting code
+
+3. **Keep methods small**: Single Responsibility Principle
+
+4. **Use interfaces**: Program to interfaces, not implementations
+
+5. **Exception handling**: Don't swallow exceptions, log them
+
+6. **Use try-with-resources**: Automatic resource management
+
+7. **Prefer immutability**: Use `final` when possible
+
+8. **Use StringBuilder**: For string concatenation in loops
+
+9. **Override equals() and hashCode()**: When needed
+
+10. **Use collections wisely**: Choose appropriate data structures
+
+11. **Write tests**: Unit tests with JUnit
+
+12. **Use dependency injection**: Loose coupling
+
+13. **Follow SOLID principles**: Better design
+
+14. **Use streams effectively**: But don't overuse
+
+15. **Keep dependencies updated**: Security and features
+
+## Common Patterns
+
+### Try-with-resources
+```java
+try (BufferedReader br = new BufferedReader(new FileReader("file.txt"))) {
+    String line = br.readLine();
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+### Optional to avoid null
+```java
+Optional<String> optional = Optional.ofNullable(getValue());
+String result = optional.orElse("default");
+```
+
+### Stream API
+```java
+List<String> filtered = list.stream()
+    .filter(s -> s.startsWith("A"))
+    .map(String::toUpperCase)
+    .collect(Collectors.toList());
+```
+
+### Lambdas
+```java
+// Old way
+button.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent e) {
+        doSomething();
+    }
+});
+
+// Lambda
+button.addActionListener(e -> doSomething());
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Unable to locate a Java Runtime" or "java: command not found"**
+   - **Problem**: Java is not installed or not in PATH
+   - **Solution with SDKMAN** (recommended):
+     ```bash
+     # Install SDKMAN
+     curl -s "https://get.sdkman.io" | bash
+     source "$HOME/.sdkman/bin/sdkman-init.sh"
+     
+     # Install Java
+     sdk install java 17.0.9-tem
+     
+     # Verify
+     java -version
+     javac -version
+     ```
+   - **Manual Solution**:
+     ```bash
+     # macOS
+     export JAVA_HOME=$(/usr/libexec/java_home)
+     export PATH="$JAVA_HOME/bin:$PATH"
+     
+     # Linux
+     export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+     export PATH="$JAVA_HOME/bin:$PATH"
+     ```
+
+2. **"javac: command not found" (but java works)**
+   - **Problem**: Have JRE but not JDK
+   - **Solution**: Install JDK (includes compiler)
+     ```bash
+     sdk install java 17.0.9-tem  # Includes javac
+     ```
+
+3. **"class [ClassName] is public, should be declared in a file named [ClassName].java"**
+   - **Problem**: Public class name doesn't match filename
+   - **Solution**: 
+     ```bash
+     # Option 1: Rename file to match class name
+     mv MyFile.java MyClass.java
+     
+     # Option 2: Make class non-public (for learning)
+     # Change: public class MyClass
+     # To:     class MyClass
+     ```
+
+4. **"Could not find or load main class HelloWorld"**
+   - **Problem**: Running from wrong directory or incorrect class name
+   - **Solution**:
+     ```bash
+     # Ensure you're in the directory with .class file
+     cd /path/to/class/files
+     
+     # Use class name, not filename (no .class extension)
+     java HelloWorld  # Correct
+     # Not: java HelloWorld.class
+     ```
+
+5. **"JAVA_HOME not set"**
+   - **Solution**:
+     ```bash
+     # macOS/Linux - add to ~/.zshrc or ~/.bashrc
+     export JAVA_HOME=$(/usr/libexec/java_home)  # macOS
+     export JAVA_HOME=/usr/lib/jvm/java-17-openjdk  # Linux
+     export PATH="$JAVA_HOME/bin:$PATH"
+     
+     # Reload shell
+     source ~/.zshrc
+     
+     # Windows (PowerShell as Admin)
+     [System.Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Program Files\Java\jdk-17", "Machine")
+     ```
+
+6. **Running Java with SDKMAN (if not in PATH)**
+   - **Temporary Solution**:
+     ```bash
+     bash -c 'source ~/.sdkman/bin/sdkman-init.sh && javac HelloWorld.java && java HelloWorld'
+     ```
+   - **Permanent Solution**: Add to shell profile
+     ```bash
+     echo 'source "$HOME/.sdkman/bin/sdkman-init.sh"' >> ~/.zshrc
+     source ~/.zshrc
+     ```
+
+7. **"ClassNotFoundException"**
+   - Check classpath: `java -cp .;lib/* MainClass`
+   - Verify package structure matches directory structure
+
+8. **"NoClassDefFoundError"**
+   - Class was present at compile time but missing at runtime
+   - Check all dependencies are in classpath
+
+9. **"OutOfMemoryError"**
+   - Increase heap size: `java -Xmx2g MainClass`
+   - Check for memory leaks
+
+10. **Wrong Java version**
+    ```bash
+    # Check which java is being used
+    which java
+    java -version
+    
+    # With SDKMAN, switch versions
+    sdk list java
+    sdk use java 17.0.9-tem    # For current session
+    sdk default java 17.0.9-tem  # Set as default
+    
+    # Or update PATH to use correct version
+    export PATH="/path/to/jdk/bin:$PATH"
+    ```
+
+11. **Maven/Gradle not found**
+    - Ensure build tool is installed and in PATH
+    - Use wrapper: `./mvnw` or `./gradlew`
+
+12. **VSCode not recognizing Java project**
+    - Install Java Extension Pack
+    - Reload window: Cmd/Ctrl + Shift + P → "Reload Window"
+    - Check Java Language Server status
+
+### Installation Verification
+
+After installation, verify everything works:
+
+```bash
+# 1. Check Java is installed
+java -version
+javac -version
+
+# 2. Create test file
+cat > Test.java << 'EOF'
+public class Test {
+    public static void main(String[] args) {
+        System.out.println("Java works!");
+    }
+}
+EOF
+
+# 3. Compile
+javac Test.java
+
+# 4. Run
+java Test
+
+# 5. Expected output
+# Java works!
+
+# 6. Clean up
+rm Test.java Test.class
+```
+
+## Environment Variables
+
+```bash
+# Set JAVA_HOME (add to ~/.zshrc or ~/.bashrc)
+export JAVA_HOME=$(/usr/libexec/java_home)  # macOS
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk  # Linux
+
+# Add to PATH
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# Maven
+export MAVEN_HOME=/usr/local/maven
+export PATH="$MAVEN_HOME/bin:$PATH"
+
+# Gradle
+export GRADLE_HOME=/usr/local/gradle
+export PATH="$GRADLE_HOME/bin:$PATH"
+```
+
+## Quick Start Example
+
+### Creating Your First Java Program
+
+Based on actual execution experience:
+
+**Step 1: Create the Java source file**
+
+```java
+// HelloWorld.java
+// Important: Public class name MUST match filename exactly
+public class HelloWorld {
+    /**
+     * Main method - entry point of the program
+     * JVM looks for this exact signature to start execution
+     */
+    public static void main(String[] args) {
+        // Print to console
+        System.out.println("Hello world!");
+    }
+}
+```
+
+**Step 2: Save as HelloWorld.java**
+- Filename must match the public class name exactly
+- Case-sensitive: `HelloWorld.java` not `helloworld.java`
+
+**Step 3: Compile the program**
+
+```bash
+# Compile (creates HelloWorld.class)
+javac HelloWorld.java
+
+# If Java not in PATH, use SDKMAN
+bash -c 'source ~/.sdkman/bin/sdkman-init.sh && javac HelloWorld.java'
+```
+
+**Step 4: Run the compiled program**
+
+```bash
+# Run (note: use class name, not filename)
+java HelloWorld
+
+# With SDKMAN
+bash -c 'source ~/.sdkman/bin/sdkman-init.sh && java HelloWorld'
+```
+
+**Expected Output:**
+```
+Hello world!
+```
+
+**Step 5: Verify files created**
+
+```bash
+ls -lh HelloWorld*
+
+# Output:
+# -rw-r--r--  2.4K  HelloWorld.java   # Source code
+# -rw-r--r--  426B  HelloWorld.class  # Compiled bytecode
+```
+
+### File Naming Rules
+
+**✅ Correct - Public class matches filename:**
+```java
+// File: HelloWorld.java
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello world!");
+    }
+}
+```
+
+**❌ Incorrect - Public class doesn't match filename:**
+```java
+// File: MyProgram.java
+public class HelloWorld {  // ERROR: Must be in HelloWorld.java
+    public static void main(String[] args) {
+        System.out.println("Hello world!");
+    }
+}
+```
+
+**✅ Workaround for learning - Non-public class:**
+```java
+// File: 01-hello-world.java
+class HelloWorld01 {  // Not public, so any filename works
+    public static void main(String[] args) {
+        System.out.println("Hello world!");
+    }
+}
+// Compile: javac 01-hello-world.java
+// Run: java HelloWorld01
+```
+
+### Understanding the Compilation Process
+
+```
+┌─────────────────┐
+│ HelloWorld.java │  ← Source code (human-readable)
+└────────┬────────┘
+         │
+         ▼
+    ┌────────┐
+    │ javac  │  ← Java Compiler
+    └────┬───┘
+         │
+         ▼
+┌────────────────────┐
+│ HelloWorld.class   │  ← Bytecode (JVM-readable)
+└─────────┬──────────┘
+          │
+          ▼
+     ┌────────┐
+     │  JVM   │  ← Java Virtual Machine
+     └────┬───┘
+          │
+          ▼
+    "Hello world!"  ← Output
+```
+
+### Common Variations
+
+**1. Using print() instead of println():**
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.print("Hello world!\n");
+    }
+}
+```
+
+**2. Using printf() for formatted output:**
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.printf("Hello %s!\n", "world");
+    }
+}
+```
+
+**3. With variables:**
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        String message = "Hello world!";
+        System.out.println(message);
+    }
+}
+```
+
+**4. With command-line arguments:**
+```java
+public class HelloWorld {
+    public static void main(String[] args) {
+        if (args.length > 0) {
+            System.out.println("Hello " + args[0] + "!");
+        } else {
+            System.out.println("Hello world!");
+        }
+    }
+}
+```
+
+```bash
+# Compile once
+javac HelloWorld.java
+
+# Run with different arguments
+java HelloWorld        # Output: Hello world!
+java HelloWorld Alice  # Output: Hello Alice!
+java HelloWorld Bob    # Output: Hello Bob!
+```
+
+### One-Line Compile and Run
+
+```bash
+# Compile and run in one command
+javac HelloWorld.java && java HelloWorld
+
+# With error handling
+javac HelloWorld.java && java HelloWorld || echo "Error occurred"
+
+# With SDKMAN
+bash -c 'source ~/.sdkman/bin/sdkman-init.sh && javac HelloWorld.java && java HelloWorld'
+```
+
+### Viewing Bytecode (Advanced)
+
+```bash
+# Disassemble the class file to see JVM instructions
+javap -c HelloWorld
+
+# Output shows bytecode:
+# Compiled from "HelloWorld.java"
+# public class HelloWorld {
+#   public static void main(java.lang.String[]);
+#     Code:
+#        0: getstatic     #7  // Field java/lang/System.out
+#        3: ldc           #13 // String Hello world!
+#        5: invokevirtual #15 // Method java/io/PrintStream.println
+#        8: return
+# }
+```
+
+### Clean Up
+
+```bash
+# Remove compiled class files
+rm *.class
+
+# Or specific file
+rm HelloWorld.class
+```
+
+### Key Takeaways
+
+1. **Public class name must match filename** (case-sensitive)
+2. **`.java`** = source code (human-readable)
+3. **`.class`** = bytecode (JVM-readable)
+4. **`javac`** = compiler (source → bytecode)
+5. **`java`** = runtime (executes bytecode)
+6. **Main method signature must be exact**: `public static void main(String[] args)`
+7. **Use class name to run, not filename**: `java HelloWorld` not `java HelloWorld.class`
+
