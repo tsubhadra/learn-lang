@@ -1,0 +1,10 @@
+# List rules
+cargo run -- list --bucket my-bucket
+
+# Create archival rule
+cargo run -- create --bucket my-bucket --id archive-logs \
+  --prefix logs/ --glacier-days 90
+
+# Archive immediately
+cargo run -- archive --bucket my-bucket --prefix old-data/ \
+  --storage-class GLACIER
