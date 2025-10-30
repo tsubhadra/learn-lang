@@ -1,0 +1,594 @@
+================================================================================
+LINE-BY-LINE EXPLANATION: 2018-Era Rust S3 Lifecycle CLI Tool
+================================================================================
+
+This file implements an AWS S3 Lifecycle and Archival Management CLI tool using
+2018-era Rust patterns with rusoto 0.42, tokio-core 0.1, and futures 0.1.
+
+================================================================================
+LINES 1-10: DOCUMENTATION HEADER
+================================================================================
+
+Lines 1-10: Comment block documenting the original 2018 dependencies
+- These were the target dependencies from July 2018
+- rusoto_core/rusoto_s3 0.37 are the original versions (we use 0.42 due to yanked deps)
+- tokio-core 0.1 and futures 0.1 represent the 2018 async ecosystem
+- Note: This is documentation only; actual deps are in Cargo.toml
+
+================================================================================
+LINES 12-17: EXTERNAL CRATE DECLARATIONS (2015 Edition Style)
+================================================================================
+
+Line 12: extern crate rusoto_core;
+- Declares the rusoto_core crate (AWS SDK core functionality)
+- In Rust 2015 edition, external crates must be explicitly declared
+- Modern Rust (2018+) doesn't require this
+
+Line 13: extern crate rusoto_s3;
+- Declares the rusoto_s3 crate (AWS S3 API bindings)
+- Provides all S3 operation types and traits
+
+Line 14: extern crate clap;
+- Declares the clap crate (Command Line Argument Parser)
+- Version 2.32 uses the builder pattern (pre-derive macros)
+
+Line 15: extern crate tokio_core;
+- Declares tokio-core 0.1 (2018-era async runtime)
+- Provides the Core event loop for running async operations
+- This is pre-async/await syntax (which came in Rust 2018)
+
+Line 16: extern crate futures;
+- Declares futures 0.1 (old futures ecosystem)
+- Provides the Future trait for async operations
+- Futures 0.1 uses .and_then() and .map_err() instead of .await
+
+Line 17: extern crate serde_json;
+- Declares serde_json for JSON serialization (though not heavily used here)
+
+================================================================================
+LINES 19-28: IMPORTS
+================================================================================
+
+Line 19: use rusoto_core::Region;
+- Imports the Region enum for specifying AWS regions
+- Region::default() uses the default region from AWS config
+
+Lines 20-24: use rusoto_s3::{ ... };
+- Line 20: S3 trait - provides all S3 operations as trait methods
+- Line 21: S3Client - the concrete client implementation
+- Line 21: GetBucketLifecycleConfigurationRequest - request type for getting rules
+- Line 21: PutBucketLifecycleConfigurationRequest - request type for creating/updating rules
+- Line 22: DeleteBucketLifecycleRequest - request type for deleting all rules
+- Line 22: BucketLifecycleConfiguration - the configuration container
+- Line 22: LifecycleRule - individual rule structure
+- Line 22: LifecycleRuleFilter - filter for which objects the rule applies to
+- Line 23: Transition - defines storage class transitions
+- Line 23: LifecycleExpiration - defines when objects expire/delete
+- Line 23: ListObjectsV2Request - request type for listing S3 objects
+- Line 23: CopyObjectRequest - request type for copying objects (used for archiving)
+
+Line 25: use clap::{App, Arg, SubCommand, ArgMatches};
+- App - the CLI application builder
+- Arg - individual command-line argument
+- SubCommand - sub-commands like "list", "create", etc.
+- ArgMatches - parsed command-line arguments
+
+Line 26: use tokio_core::reactor::Core;
+- Core is the event loop that drives async operations
+- In 2018, you explicitly create and run the event loop
+- Modern Rust uses #[tokio::main] instead
+
+Line 27: use futures::Future;
+- The Future trait for composable async operations
+- Not actually used in this code (hence the compiler warning)
+- Included for historical accuracy
+
+Line 28: use std::process;
+- Standard library process utilities
+- Used for process::exit(1) on errors
+
+================================================================================
+LINES 30-191: MAIN FUNCTION - CLI SETUP
+================================================================================
+
+Line 30: fn main() {
+- Entry point of the program
+- Synchronous - async operations are run inside via Core
+
+Lines 31-185: let matches = App::new("s3-lifecycle")...
+- Creates the CLI application using the builder pattern
+
+Line 31: App::new("s3-lifecycle")
+- Creates a new CLI app named "s3-lifecycle"
+
+Line 32: .version("1.0")
+- Sets the version (shown with --version)
+
+Line 33: .about("AWS S3 Lifecycle and Archival Management CLI")
+- Description shown in help text
+
+Lines 34-46: .subcommand(SubCommand::with_name("list")...)
+- Defines the "list" subcommand
+
+Line 35: SubCommand::with_name("list")
+- Creates a subcommand named "list"
+
+Line 36: .about("List all lifecycle rules for a bucket")
+- Help text for this subcommand
+
+Lines 37-45: .arg(Arg::with_name("bucket")...)
+- Defines the --bucket argument
+
+Line 38: Arg::with_name("bucket")
+- Internal name for this argument
+
+Line 39: .short("b")
+- Short flag: -b
+
+Line 40: .long("bucket")
+- Long flag: --bucket
+
+Line 41: .value_name("BUCKET")
+- Placeholder name in help text
+
+Line 42: .help("S3 bucket name")
+- Help text for this argument
+
+Line 43: .required(true)
+- This argument is mandatory
+
+Line 44: .takes_value(true)
+- This argument expects a value after it
+
+Lines 47-109: .subcommand(SubCommand::with_name("create")...)
+- Defines the "create" subcommand with multiple arguments
+
+Lines 50-57: Bucket argument (same pattern as list)
+
+Lines 59-66: Rule ID argument
+- Required identifier for the lifecycle rule
+
+Lines 68-74: Prefix argument
+- Optional object key prefix filter
+- NOT required - can apply to all objects
+
+Lines 76-82: IA-days argument
+- Days until transition to STANDARD_IA (Infrequent Access)
+- Optional - only if you want this transition tier
+
+Lines 83-89: Glacier-days argument
+- Days until transition to GLACIER storage class
+- Optional - for long-term archival
+
+Lines 90-96: Deep-archive-days argument
+- Days until transition to DEEP_ARCHIVE (cheapest, slowest retrieval)
+- Optional - for very long-term archival
+
+Lines 97-103: Expiration-days argument
+- Days until objects are permanently deleted
+- Optional - for automatic cleanup
+
+Lines 104-108: Enabled flag
+- Boolean flag to enable the rule
+- If not present, rule is disabled by default
+
+Lines 110-131: .subcommand(SubCommand::with_name("delete")...)
+- Defines the "delete" subcommand
+- Requires: bucket and rule ID
+
+Lines 132-153: .subcommand(SubCommand::with_name("show")...)
+- Defines the "show" subcommand
+- Shows details of a specific rule
+- Requires: bucket and rule ID
+
+Lines 154-184: .subcommand(SubCommand::with_name("archive")...)
+- Defines the "archive" subcommand
+- Archives objects immediately (doesn't wait for lifecycle rule)
+- Requires: bucket and prefix
+- Optional: storage-class (defaults to GLACIER)
+
+Line 181: .default_value("GLACIER")
+- If --storage-class not specified, uses GLACIER
+
+Line 185: .get_matches();
+- Parses command-line arguments and returns ArgMatches
+
+Lines 187-190: Error handling for run() function
+Line 187: if let Err(e) = run(matches) {
+- If run() returns an error, handle it
+
+Line 188: eprintln!("Error: {}", e);
+- Print error to stderr
+
+Line 189: process::exit(1);
+- Exit with error code 1
+
+================================================================================
+LINES 193-247: RUN FUNCTION - COMMAND DISPATCHER
+================================================================================
+
+Line 193: fn run(matches: ArgMatches) -> Result<(), String> {
+- Takes parsed arguments
+- Returns Result - Ok(()) on success, Err(String) on failure
+
+Line 194: let mut core = Core::new()...
+- Creates the tokio-core event loop
+- This is the 2018 way to run async code
+- .map_err(...) converts error to String for our Result type
+
+Line 195: let client = S3Client::new(Region::default());
+- Creates S3 client using default AWS region
+- Region comes from AWS_REGION env var or ~/.aws/config
+
+Lines 197-244: match matches.subcommand() { ... }
+- Pattern matches on which subcommand was used
+
+Lines 198-201: ("list", Some(sub_m)) => { ... }
+- If "list" subcommand was used
+- Line 199: Extracts bucket name from arguments
+- .unwrap() is safe because bucket is required
+- Line 200: Calls list_lifecycle_rules function
+
+Lines 202-224: ("create", Some(sub_m)) => { ... }
+- If "create" subcommand was used
+- Lines 203-204: Extract required arguments (bucket, id)
+- Line 205: Extract optional prefix (returns Option<&str>)
+- Lines 206-209: Extract optional day values
+  - .value_of("ia-days") returns Option<&str>
+  - .and_then(|d| d.parse::<i64>().ok()) tries to parse as i64
+  - Result is Option<i64>
+- Line 210: Check if --enabled flag is present
+- Lines 212-223: Call create_lifecycle_rule with all parameters
+
+Lines 225-229: ("delete", Some(sub_m)) => { ... }
+- If "delete" subcommand was used
+- Extracts bucket and rule ID
+- Calls delete_lifecycle_rule
+
+Lines 230-234: ("show", Some(sub_m)) => { ... }
+- If "show" subcommand was used
+- Extracts bucket and rule ID
+- Calls show_lifecycle_rule
+
+Lines 235-240: ("archive", Some(sub_m)) => { ... }
+- If "archive" subcommand was used
+- Extracts bucket, prefix, and storage_class
+- .unwrap() on storage_class is safe due to default_value
+
+Lines 241-243: _ => { ... }
+- Default case if no subcommand provided
+- Prints help message
+
+Line 246: Ok(())
+- Return success
+
+================================================================================
+LINES 249-278: LIST_LIFECYCLE_RULES FUNCTION
+================================================================================
+
+Lines 249-253: Function signature
+- Takes mutable reference to Core (event loop)
+- Takes reference to S3Client
+- Takes bucket name as string slice
+- Returns Result<(), String>
+
+Line 254: println!("Fetching lifecycle rules for bucket: {}", bucket);
+- User feedback message
+
+Lines 256-258: let request = GetBucketLifecycleConfigurationRequest { ... }
+- Creates the AWS API request struct
+- Only needs the bucket name
+
+Lines 260-261: let result = core.run(...)...
+- Line 260: core.run() executes the async operation synchronously
+- Blocks until the S3 API call completes
+- Line 261: .map_err(...) converts AWS error to our String error type
+
+Lines 263-275: if let Some(rules) = result.rules { ... }
+- Check if any rules exist in the response
+
+Line 264: if rules.is_empty() { ... }
+- Check if rules vector is empty
+
+Lines 267-271: else { ... }
+- If rules exist, print them
+- Line 268: Print separator line (80 dashes)
+- Lines 269-271: Iterate and print each rule
+
+Lines 273-275: else { ... }
+- If result.rules is None
+
+Line 277: Ok(())
+- Return success
+
+================================================================================
+LINES 280-370: CREATE_LIFECYCLE_RULE FUNCTION
+================================================================================
+
+Lines 280-291: Function signature
+- Takes all the parameters needed to create a lifecycle rule
+- prefix, ia_days, glacier_days, deep_archive_days, expiration_days are optional
+- enabled is a boolean
+
+Lines 292-300: Get existing rules
+- Lines 293-295: Create request to get current rules
+- Lines 297-300: Try to get existing rules
+  - If successful, unwrap the rules or use empty vec
+  - If error (e.g., no rules exist), use empty vec
+- This allows us to add to existing rules without overwriting
+
+Lines 302-327: Build transitions vector
+- Line 303: Create empty transitions vector
+
+Lines 305-311: If STANDARD_IA days specified
+- Line 305: Check if ia_days is Some(value)
+- Lines 306-310: Create Transition struct
+  - days: number of days
+  - date: None (we use days, not specific date)
+  - storage_class: "STANDARD_IA"
+
+Lines 313-319: If GLACIER days specified
+- Same pattern for GLACIER storage class
+
+Lines 321-327: If DEEP_ARCHIVE days specified
+- Same pattern for DEEP_ARCHIVE storage class
+
+Lines 329-333: Build filter
+- Line 330: Create LifecycleRuleFilter struct
+- Line 331: Set prefix if provided
+  - prefix.map(|p| p.to_string()) converts Option<&str> to Option<String>
+- Line 332: Use default values for other filter fields
+
+Lines 335-340: Build expiration
+- Line 336: expiration_days.map(...) creates Option<LifecycleExpiration>
+- If Some(days), creates LifecycleExpiration struct
+- If None, result is None (no expiration)
+
+Lines 342-350: Build the lifecycle rule
+- Line 343: Create LifecycleRule struct
+- Line 344: Set rule ID
+- Line 345: Set status based on enabled flag
+  - Ternary-like: if enabled { "Enabled" } else { "Disabled" }
+- Line 346: Set the filter
+- Line 347: Set transitions
+  - If empty vec, use None
+  - If has items, wrap in Some
+- Line 348: Set expiration (already Option)
+- Line 349: Use defaults for other fields
+
+Lines 352-354: Replace existing rule with same ID
+- Line 353: Remove any existing rule with this ID
+  - Uses retain() which keeps elements that match the predicate
+  - Predicate returns false for rules with matching ID (so they're removed)
+- Line 354: Add the new rule
+
+Lines 356-362: Apply configuration
+- Lines 357-362: Create PutBucketLifecycleConfigurationRequest
+- Line 359: Wrap rules in BucketLifecycleConfiguration struct
+- Note: In rusoto 0.42, it's BucketLifecycleConfiguration, not LifecycleConfiguration
+
+Lines 364-365: Execute the request
+- core.run() executes the async put operation
+- .map_err() converts error to String
+
+Line 367: Print success message
+
+Line 369: Ok(())
+- Return success
+
+================================================================================
+LINES 372-412: DELETE_LIFECYCLE_RULE FUNCTION
+================================================================================
+
+Lines 372-377: Function signature
+- Takes event loop, client, bucket, and rule ID
+
+Lines 378-380: Create request to get current rules
+
+Lines 382-383: Execute request and get current rules
+
+Lines 385-387: Track original count and filter out the rule to delete
+- Line 385: Get rules vec or empty vec
+- Line 386: Save original length
+- Line 387: Remove the rule with matching ID
+
+Lines 389-392: Check if rule was found
+- Line 389: If length unchanged, rule wasn't found
+- Line 390: Print message
+- Line 391: Return success (not an error)
+
+Lines 394-400: If all rules deleted
+- Line 394: Check if rules vector is now empty
+- Lines 395-397: Create DeleteBucketLifecycleRequest
+- Lines 398-399: Execute delete request
+  - This removes the entire lifecycle configuration
+- Line 400: Print success message
+
+Lines 401-409: If some rules remain
+- Lines 402-405: Create put request with remaining rules
+- Lines 406-407: Execute put request
+- Line 408: Print success message
+
+Line 411: Ok(())
+
+================================================================================
+LINES 414-440: SHOW_LIFECYCLE_RULE FUNCTION
+================================================================================
+
+Lines 414-419: Function signature
+- Shows details of a specific rule
+
+Lines 420-422: Create get request
+
+Lines 424-425: Execute request
+
+Lines 427-437: Search for the rule
+- Line 427: Check if rules exist
+- Line 428: Find rule with matching ID
+  - .iter() creates iterator over rules
+  - .find() returns Option with first match
+- Lines 429-431: If found, print rule details
+- Lines 432-433: If not found, print message
+
+Lines 435-437: If no rules exist at all
+
+Line 439: Ok(())
+
+================================================================================
+LINES 442-503: ARCHIVE_OBJECTS FUNCTION
+================================================================================
+
+Lines 442-448: Function signature
+- Archives objects immediately (doesn't wait for lifecycle rule)
+
+Line 449: Print informational message
+
+Lines 451-456: Validate storage class
+- Line 451: Convert to uppercase and match
+- Line 452: Only GLACIER and DEEP_ARCHIVE are valid
+- Lines 453-455: Return error for invalid class
+
+Line 458: let mut continuation_token = None;
+- For paginating through large object lists
+
+Line 459: let mut total_objects = 0;
+- Counter for archived objects
+
+Lines 461-499: loop { ... }
+- Infinite loop - will break when pagination complete
+
+Lines 462-468: Create list objects request
+- Line 463: Set bucket name
+- Line 464: Set prefix filter
+- Line 465: Max 1000 objects per request (AWS limit)
+- Line 466: Set continuation token for pagination
+
+Lines 470-471: Execute list request
+
+Lines 473-492: Process each object
+- Line 473: Check if contents exist
+- Line 474: Iterate over each object
+- Line 475: Check if object has a key (should always be true)
+- Line 476: Print object being archived
+
+Lines 476-483: Create copy request
+  - Line 477: Target bucket
+  - Line 478: Target key (same as source)
+  - Line 479: Copy source in format "bucket/key"
+  - Line 480: New storage class
+  - Line 481: COPY metadata (preserve existing metadata)
+  - Line 482: Use defaults for other fields
+
+Lines 485-486: Execute copy request
+  - In S3, to change storage class, you copy object to itself
+  - This is the standard S3 archival pattern
+
+Line 488: Increment counter
+Line 489: Print success checkmark
+
+Lines 494-498: Handle pagination
+- Line 494: Check if results were truncated (more results available)
+- Line 495: Set continuation token for next request
+- Lines 496-498: If not truncated, break loop
+
+Line 501: Print total count
+Line 502: Ok(())
+
+================================================================================
+LINES 505-537: PRINT_RULE FUNCTION
+================================================================================
+
+Lines 505: fn print_rule(rule: &LifecycleRule) {
+- Helper function to format and print a lifecycle rule
+
+Line 506: Print rule ID
+- .as_ref() converts Option<String> to Option<&String>
+- .unwrap_or(&"N/A".to_string()) provides default if None
+
+Line 507: Print status (Enabled/Disabled)
+
+Lines 509-515: Print prefix if it exists
+- Line 509: Check if filter exists
+- Line 510: Check if prefix exists within filter
+- Line 511: Check if prefix is not empty
+- Line 512: Print the prefix
+
+Lines 517-528: Print transitions if they exist
+- Line 517: Check if transitions exist
+- Line 518: Print header
+- Lines 519-527: Iterate over each transition
+- Line 520: Check if days is set (vs date)
+- Lines 521-525: Print days and storage class
+  - Uses arrow → for visual clarity
+
+Lines 530-534: Print expiration if it exists
+- Line 530: Check if expiration exists
+- Line 531: Check if days is set
+- Line 532: Print expiration days
+
+Line 536: Print separator line
+
+================================================================================
+KEY CONCEPTS AND PATTERNS
+================================================================================
+
+1. 2018-ERA ASYNC PATTERN:
+   - Uses tokio-core::reactor::Core instead of #[tokio::main]
+   - Explicitly creates event loop: Core::new()
+   - Runs async operations: core.run(future)
+   - No .await syntax (came in Rust 2018 edition)
+
+2. ERROR HANDLING:
+   - Functions return Result<(), String>
+   - .map_err() converts different error types to String
+   - ? operator propagates errors up the call stack
+
+3. OPTION HANDLING:
+   - .value_of() returns Option<&str>
+   - .and_then() chains optional operations
+   - .map() transforms optional values
+   - .unwrap_or_default() provides defaults
+
+4. CLAP BUILDER PATTERN:
+   - Fluent API with chained method calls
+   - SubCommand::with_name() for subcommands
+   - Arg::with_name() for arguments
+   - Builder pattern was standard before derive macros
+
+5. S3 ARCHIVAL TECHNIQUE:
+   - To change storage class, copy object to itself
+   - CopyObjectRequest with same source and destination
+   - Set new storage_class in the copy request
+   - This is the standard AWS S3 pattern
+
+6. PAGINATION PATTERN:
+   - Loop until is_truncated is false
+   - Use continuation_token for next page
+   - Process each page in sequence
+   - Common pattern for AWS APIs
+
+7. RUSOTO 0.42 TYPES:
+   - BucketLifecycleConfiguration (not LifecycleConfiguration)
+   - LifecycleRule contains filter, transitions, expiration
+   - Transition specifies days and storage_class
+   - Request structs follow pattern: Verb + Noun + Request
+
+================================================================================
+HISTORICAL CONTEXT
+================================================================================
+
+This code represents Rust as it was in 2018:
+- Rust 2015 edition (requires extern crate)
+- Pre async/await syntax (Rust 1.39+)
+- tokio-core (replaced by tokio 0.2+ with async/await)
+- futures 0.1 (replaced by futures 0.3+ with async/await)
+- Clap 2.x builder pattern (Clap 3+ has derive macros)
+- Rusoto 0.42 (later replaced by AWS SDK for Rust)
+
+This is a working reproduction of 2018-era Rust async programming,
+demonstrating how async code was written before async/await stabilized.
+
+================================================================================
+END OF EXPLANATION
+================================================================================
+
